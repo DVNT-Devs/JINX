@@ -1,0 +1,75 @@
+{
+    "roles": {
+        "dom": "1147453317241389117",
+        "switch": "1150454235360669768",
+        "sub": "1150453458047078540",
+        "exploring": "1150483694105137354",
+        "ageVerified": "1164256198489538653",
+        "dms": {
+            "open": "1159358790756474942",
+            "ask": "1159359606254997584",
+            "closed": "1159359866398310410"
+        },
+        "relationships": {
+            "play": "1161756325181673492",
+            "intimate": "1161756713368682636",
+            "friends": "1161756872685146152"
+        },
+        "flirting": {
+            "yes": "1162086510674317463",
+            "no": "1162086774131138651"
+        }
+    },
+    "users": {
+        "pinea": "438733159748599813",
+        "saro": "427145734639321088"
+    },
+
+    "praise": {
+        "*": [
+            "I'm so proud of you",
+            "You beg so prettily, how can I refuse",
+            "You're perfect",
+            "You're doing so good",
+            "*head pats*",
+            "Wow, look at you!",
+            "You're a pleasure to use.",
+            "God you're so sexy",
+            "All I want to do is watch you",
+            "God you're a dream"
+        ],
+        "$roles.dom": [
+            "You give the best cuddles",
+            "You make me feel so special",
+            "Yes Chef",
+            "You're taking such good care of your toy"
+        ],
+        "$roles.sub": [
+            "I love the way you look when you're on your knees",
+            "Such a good little whore",
+            "That's my good little cumslut",
+            "Such a good little fuckdoll",
+            "My pretty little needy whore",
+            "You're my perfect little toy",
+            "So well-behaved and on your knees",
+            "I love hearing you whimper"
+        ],
+        "$users.saro": [
+            "You fit in well as a pink name"
+        ]
+    },
+    "insult": {
+        "*": [
+            "*Placeholder text*"
+        ],
+        "$roles.dom": [
+
+        ],
+        "$roles.sub": [
+
+        ]
+    },
+    "triggers": {
+        "ping": "pong"
+    }
+}
