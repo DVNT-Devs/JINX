@@ -42,7 +42,8 @@
             "You give the best cuddles",
             "You make me feel so special",
             "Yes Chef",
-            "You're taking such good care of your toy"
+            "You're taking such good care of your toy",
+            "I will take you any day of the week"
         ],
         "$roles.sub": [
             "I love the way you look when you're on your knees",
@@ -58,16 +59,19 @@
             "You fit in well as a pink name"
         ]
     },
-    "insult": {
+    "degrade": {
         "*": [
             "*Placeholder text*"
         ],
         "$roles.dom": [
-
         ],
         "$roles.sub": [
-
+            "Who gave you permission to speak?",
+            "Don't make me punish you."
         ]
+    },
+    "mean": {
+        "*": []
     },
     "triggers": {
         "ping": "pong"

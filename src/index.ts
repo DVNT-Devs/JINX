@@ -37,7 +37,11 @@ client.once(Events.ClientReady, discordClient => {
                 console.error(`Event ${file} is missing an event or callback export`);
                 return;
             }
-            client.on(event.event, event.callback.bind(null, client));
+            if (event.event === Events.InteractionCreate) {
+                client.onInteractionHook = event.callback;
+            } else {
+                discordClient.on(event.event, event.callback);
+            }
             console.log(`Registered event ${event.event}`);
         }
 
@@ -51,7 +55,6 @@ client.once(Events.ClientReady, discordClient => {
                     Routes.applicationGuildCommands(discordClient.user.id, process.env["HOST_GUILD"] || ""),
                     { body: commands.map(command => command.toJSON()) }
                 );
-
                 console.log(`Successfully reloaded ${commandData.length} application (/) commands.`);
             } catch (error) {
                 // And of course, make sure you catch and log any errors!
@@ -78,6 +81,8 @@ client.on(Events.InteractionCreate, async interaction => {
         }
         return;
     }
+    // If it wasn't caught here, pass it into the hook
+    client.onInteractionHook(interaction);
 });
 
 client.on(Events.Error, console.error);

@@ -5,7 +5,6 @@ const triggers: Record<string, string> = data.triggers;
 const event = "messageCreate";
 
 const callback = (message: Message) => {
-    console.log("test");
     if (message.author.bot) return;
     const lowerContent = message.content.toLowerCase();
 
