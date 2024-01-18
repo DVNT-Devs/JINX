@@ -4,7 +4,7 @@ import { ButtonStyle, SlashCommandBuilder } from "discord.js";
 
 const dev = new SlashCommandBuilder()
     .setName("dev")
-    .setDescription("Please don't use this command");
+    .setDescription("Please don't use this command!");
 
 
 const callback = async (interaction: any) => {
