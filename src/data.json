@@ -56,7 +56,10 @@
             "I love hearing you whimper"
         ],
         "$users.saro": [
-            "You fit in well as a pink name"
+            "You fit in well as a pink name",
+            "You're adorable when you get flustered",
+            "You're so cute when you hide your face",
+            "Aww, don't cry baby girl!!"
         ]
     },
     "degrade": {
@@ -68,6 +71,9 @@
         "$roles.sub": [
             "Who gave you permission to speak?",
             "Don't make me punish you."
+        ],
+        "$users.saro": [
+            "Don't you dare change from a pink name"
         ]
     },
     "mean": {
