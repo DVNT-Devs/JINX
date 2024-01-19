@@ -14,22 +14,34 @@ const findDotSeparatedKey = (key: string) => {
     return value;
 };
 
+const newName = (s: string) => {
+    // Replace any instances of ${...} with findDotSeparatedKey(...)
+    const regex = /\${(.*?)}/g;
+    const matches = s.match(regex);
+    if (!matches) return s;
+    for (const match of matches) {
+        const key = match.slice(2, -1);
+        const value = findDotSeparatedKey(key);
+        s = s.replace(match, value);
+    }
+    return s;
+};
+
 const fixKeys = (obj: Record<string, any>) => {
     // This function will take the keys of an object and correct them.
     // If one says $channels.dev, it will look up data.channels.dev and use that value instead.
 
     // Loop through the keys
     for (const key in obj) {
-        // Check if the key starts with a $
-        if (key.startsWith("$")) {
-            // Remove the $, then find the value in the data
-            const newKey = findDotSeparatedKey(key.slice(1));
-            // If the value is a string, replace the key with it
-            if (typeof newKey === "string") {
-                obj[newKey] = obj[key];
-                delete obj[key];
-            }
-        }
+        // Both the key or value (if it's a string) could be a dot-separated key, formatted as ${key.a.b.c}
+        // If the key is a dot-separated key, replace it with the value. It may not be at the start, and there could be multiple.
+        const newKey = newName(key);
+        const newValue = typeof obj[key] === "string" ? newName(obj[key]) : obj[key];
+
+        // Replace the key and value
+        delete obj[key];
+        obj[newKey] = newValue;
+
         // If the value is an object, run this function on it
         if (typeof obj[key] === "object") {
             obj[key] = fixKeys(obj[key]);

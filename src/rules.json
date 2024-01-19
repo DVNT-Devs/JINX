@@ -1,0 +1,119 @@
+{
+    "channels": {
+        "report": "1161826563843690497",
+        "feedback": "1149216119593377802",
+        "sfw-kinky": "1163488341862396075"
+    },
+    "rules": {
+        "Minors": [
+            {
+                "emoji": "🔞",
+                "name": "You must be 18 years old to join the server. Anyone found to be under 18 will be banned.",
+                "warn": "You must be 18 or older to join the server"
+            },
+            {
+                "emoji": "🔞",
+                "name": "Anybody found harboring a minor or providing advice on how to remain on the server as a minor will be banned.",
+                "warn": "You cannot help minors stay on the server"
+            },
+            {
+                "emoji": "⚠️",
+                "name": "You must verify your age to join the server."
+            }
+        ],
+        "Safety": [
+            {
+                "emoji": "🚫",
+                "name": "Do not save other people's pictures or videos without their permission.",
+                "warn": "$rules.safety.0.name"
+            },
+            {
+                "emoji": "🚫",
+                "name": "Do not share anything that compromises your privacy."
+            },
+            {
+                "emoji": "⚠️",
+                "name": "Be careful when sharing your personal information."
+            }
+        ],
+        "General Rules": [
+            {
+                "emoji": "😊",
+                "name": "All activities must be consensual."
+            },
+            {
+                "emoji": "🗣️",
+                "name": "English only.",
+                "warn": "Please speak English in the server"
+            },
+            {
+                "emoji": "👀",
+                "name": "Post in the correct channels.",
+                "warn": "Please post in the correct channels"
+            },
+            {
+                "emoji": "🚫",
+                "name": "Creepy or disruptive behavior results in instant ban without warnings.",
+                "warn": "Please do not be creepy or disruptive"
+            },
+            {
+                "emoji": "‼️",
+                "name": "Report harmful activities in <#${channels.report}>."
+            },
+            {
+                "emoji": "👍",
+                "name": "Help us make improvements in <#${channels.feedback}>."
+            },
+            {
+                "emoji": "🚫",
+                "name": "No porn or links to porn"
+            }
+        ],
+        "Content Guidelines": [
+            {
+                "emoji": "✅",
+                "name": "Breast and butt nudity is allowed throughout the server if labeled as NSFW.",
+                "warn": "Please label images of breasts/butt nudity as NSFW"
+            },
+            {
+                "emoji": "😶‍🌫️",
+                "name": "Bruising, blood, hard kinks, and nudity must be spoiled.",
+                "warn": "Please mark images of bruising, blood, hard kinks, and nudity with a spoiler"
+            },
+            {
+                "emoji": "⚠️",
+                "name": "Genital nudity is only allowed in <#${channels.sfw-kinky}>.",
+                "warn": "Please only post images of genital nudity in <#${channels.sfw-kinky}>"
+            },
+            {
+                "emoji": "🚫",
+                "name": "Genitals cannot be the focus of the content even if fully clothed.",
+                "warn": "Please do not post images of genitals even if fully clothed"
+            },
+            {
+                "emoji": "🚫",
+                "name": "No explicit sexual acts.",
+                "warn": "Please do not post images of explicit sexual acts"
+            }
+        ]
+    },
+    "extra": {
+        "Content Warnings and Spoilers": [
+            "[How do I spoiler images and text?](<https://support.discord.com/hc/en-us/articles/360022320632-Spoiler-Tags>)"
+        ],
+        "SFW Definition": [
+            "👙 Fully clothed",
+            "🚫 No nipples",
+            "🚫 No nude butts"
+        ],
+        "NSFW Definition": [
+            "🫦 Genital nudity"
+        ],
+        "Content Expectations": [
+            "✅ Kinky",
+            "✅ Tastefully Erotic",
+            "🚫 No Porn",
+            "🚫 No Vanilla Sexual Gratification"
+        ]
+    }
+}

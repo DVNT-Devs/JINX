@@ -22,7 +22,9 @@
     },
     "users": {
         "pinea": "438733159748599813",
-        "saro": "427145734639321088"
+        "saro": "427145734639321088",
+        "cheff": "667128864044220459",
+        "chaosDwarf": "773175937264779265"
     },
 
     "praise": {
@@ -33,19 +35,22 @@
             "You're doing so good",
             "*head pats*",
             "Wow, look at you!",
-            "You're a pleasure to use.",
+            "You're a pleasure to use",
             "God you're so sexy",
             "All I want to do is watch you",
-            "God you're a dream"
+            "You deserve all the praise in the world",
+            "God you're a dream",
+            "Be a good slut and bend over for me",
+            "Dripping for me, are you?",
+            "Ask nicely, little slut"
         ],
-        "$roles.dom": [
+        "${roles.dom}": [
             "You give the best cuddles",
             "You make me feel so special",
-            "Yes Chef",
             "You're taking such good care of your toy",
             "I will take you any day of the week"
         ],
-        "$roles.sub": [
+        "${roles.sub}": [
             "I love the way you look when you're on your knees",
             "Such a good little whore",
             "That's my good little cumslut",
@@ -55,29 +60,76 @@
             "So well-behaved and on your knees",
             "I love hearing you whimper"
         ],
-        "$users.saro": [
+        "${users.saro}": [
             "You fit in well as a pink name",
             "You're adorable when you get flustered",
             "You're so cute when you hide your face",
             "Aww, don't cry baby girl!!"
+        ],
+        "${users.cheff}": [
+            "Yes Cheff",
+            "You love to run your mouth Cheff, but now you will use it for something else",
+            "If you keep mouthing off, I will make sure you wont be able to sit for a few days",
+            "You can bark and bite, but you will end up leashed and moaning",
+            "If you want to fight, you will end up pinned, not that you wouldn't enjoy that",
+            "Bratty cheff is fun but submissive cheff is just so breedable"
+        ],
+        "${users.chaosDwarf}": [
+            "I enjoy watching you melt into a puddle, little candle"
         ]
     },
     "degrade": {
         "*": [
             "*Placeholder text*"
         ],
-        "$roles.dom": [
+        "${roles.dom}": [
         ],
-        "$roles.sub": [
+        "${roles.sub}": [
             "Who gave you permission to speak?",
-            "Don't make me punish you."
+            "Don't make me punish you"
         ],
-        "$users.saro": [
+        "${users.saro}": [
             "Don't you dare change from a pink name"
         ]
     },
     "mean": {
-        "*": []
+        "*": [
+            "It's impossible to underestimate you",
+            "You're as sharp as a rubber ball",
+            "I was going to give you a nasty look, but I see you already have one",
+            "How do you not fall down more?",
+            "You're as deep as a puddle in a parking lot",
+            "I just love that you don't care what people think",
+            "You remind me of a slightly tilted picture frame",
+            "Stupidity is not a crime. You're free to go",
+            "You really should come with a warning label",
+            "I would describe your personality as a vibrant shade of beige",
+            "Can I have the name of your hair salon? I need to know where not to go",
+            "You seem to be suffering from delusions of adequacy",
+            "You are the human equivalent of a participation trophy",
+            "Whatever kind of look you were aiming for, you missed",
+            "If you were a spice, you'd be flour",
+            "I smell something burning. Are you trying to think again?",
+            "You're as useless as the 'ueue' in 'queue'",
+            "Your face is just fine. It's your personality that's the issue",
+            "I'm not saying you're ugly, but maybe you should start walking backward",
+            "You have the charisma of a wet sock",
+            "Guess you're not as dumb as you look. How could you be?!",
+            "You should use glue instead of chapstick",
+            "I've seen salad that dresses better than you",
+            "You continue to meet my expectations",
+            "You look easy to draw",
+            "Honestly, I'm just impressed you could read this",
+            "Your face just made me agnostic",
+            "You look like a 'before' picture",
+            "You'd fail a personality test",
+            "Your birth control of choice appears to be your personality",
+            "You look like something I drew with my left hand",
+            "You're a gray sprinkle on a Funfetti cupcake",
+            "Your face would make an onion cry",
+            "Don't be ashamed of who you are.That's your parents' job",
+            "You're about as bright as a cave"
+        ]
     },
     "triggers": {
         "ping": "pong"
