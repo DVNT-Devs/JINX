@@ -13,7 +13,7 @@ const insult = new SlashCommandBuilder()
         .addChoices(
             { name: "Mean", value: "mean" },
             { name: "Degradation", value: "degrade" }
-        )
+        ).setRequired(false)
     )
     .addUserOption(option => option.setName("user").setDescription("The user to insult | Default: Yourself").setRequired(false));
 
@@ -21,7 +21,7 @@ const insult = new SlashCommandBuilder()
 const callback = async (interaction: CommandInteraction) => {
     const user = interaction.options.getUser("user") || interaction.user;
     const target = interaction.guild!.members.cache.get(user.id) as GuildMember;
-    const insultType = (interaction.options.get("type")?.value) as "mean" | "degrade" || "mean";
+    const insultType = (interaction.options.get("type")?.value) as "mean" | "degrade" || "degrade";
 
     const response = responseFrom(target as GuildMember, insultType);
 
