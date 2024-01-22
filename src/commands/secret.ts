@@ -1,5 +1,5 @@
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "@discordjs/builders";
-import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder } from "@discordjs/builders";
+import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel, ModalSubmitInteraction, TextInputStyle } from "discord.js";
 import { Colours, rules } from "../data";
 import { logSecret } from "../actions/secrets";
 
@@ -12,17 +12,45 @@ const praise = new SlashCommandBuilder()
 
 const tickEmoji = "947441964234702849";
 
-const callback = async (interaction: CommandInteraction) => {
-    const secret = interaction.options.get("secret")!.value as string;
+const callback = async (interaction: CommandInteraction | ButtonInteraction) => {
+    let secret;
+    let i;
+    if (interaction.isButton()) {
+        await interaction.showModal(new ModalBuilder()
+            .setCustomId("text")
+            .setTitle("Share your Secret")
+            .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
+                .setCustomId("secret")
+                .setLabel("Share your secret")
+                .setMaxLength(2000)
+                .setStyle(TextInputStyle.Short)
+                .setRequired(false)
+                .setPlaceholder("Pressing submit will NOT send a message")
+            ))
+        );
+        i = undefined as undefined | ModalSubmitInteraction;
+        try {
+            i = await interaction.awaitModalSubmit({ filter: (i) =>
+                i.user.id === interaction.user.id,
+            time: 60000 }) as typeof i;
+        } catch (e) {
+            return;
+        }
+        if (!i) return;
+        secret = i.components[0]?.components[0]?.value;
+    } else {
+        secret = interaction.options.get("secret")!.value as string;
+        i = interaction;
+    }
     if (interaction.channelId !== rules.channels.secrets) {
-        await interaction.reply({ embeds: [new EmbedBuilder()
+        await i.reply({ embeds: [new EmbedBuilder()
             .setTitle("Wrong Channel")
             .setDescription(`Please use this command in <#${rules.channels.secrets}>. It shouldn't even be possible to do this...`)
             .setColor(Colours.Danger)
         ], ephemeral: true});
         return;
     }
-    const m = await interaction.reply({ embeds: [new EmbedBuilder()
+    const messageData = { embeds: [new EmbedBuilder()
         .setTitle("Secret")
         .setDescription(
             `**Preview:**\n> ${secret}\n\n` +
@@ -34,24 +62,26 @@ const callback = async (interaction: CommandInteraction) => {
             "\n\nIf you understand this and still want to send it, click the button below."
         )
         .setColor(Colours.Warning)
-    ], ephemeral: true, fetchReply: true, components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+    ], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder().setCustomId("agree").setLabel("Agree and Send").setStyle(ButtonStyle.Danger)
-    )]});
-    let i: ButtonInteraction;
+    )]};
+    const m = await i.reply({...messageData, fetchReply: true, ephemeral: true});
+    let button;
     try {
-        i = await m.awaitMessageComponent({ filter: (i) =>
+        button = await m.awaitMessageComponent({ filter: (i) =>
             i.user.id === interaction.user.id && m.id === i.message.id,
-        time: 60000 }) as typeof i;
+        time: 60000 }) as ButtonInteraction;
     } catch (e) {
         return;
     }
-    i.deferUpdate();
-    if (i.customId !== "agree") return;
+    if (!i) return;
+    button.deferUpdate();
+    if (button.customId !== "agree") return;
 
     const channel = interaction.guild!.channels.cache.get(rules.channels.secrets)! as GuildTextBasedChannel;
     const message = await channel.send(`*Anonymous said*: "${secret}"`);
     logSecret(channel.id, message.id, interaction.user.id);
-    await interaction.editReply({ embeds: [new EmbedBuilder()
+    await i.editReply({ embeds: [new EmbedBuilder()
         .setTitle("Secret Sent")
         .setDescription(`Your secret has been sent to the server. [Click here to view it.](${message.url})`)
         .setColor(Colours.Success)
@@ -62,6 +92,15 @@ const callback = async (interaction: CommandInteraction) => {
         .setStyle(ButtonStyle.Success)
         .setEmoji({ id: tickEmoji, name: "tick" } as APIMessageComponentEmoji)
     )]});
+
+    // Purge any messages from the bot with components
+    const messages = await interaction.channel!.messages.fetch({ limit: 10 });
+    const bulkDeleteChannel = interaction.channel! as GuildTextBasedChannel;
+    await bulkDeleteChannel.bulkDelete(messages.filter(m => m.author.id === interaction.client.user!.id && m.components.length > 0));
+    // Then send a new message with a button
+    await interaction.channel!.send({ components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId("global:secret").setLabel("Share your Secret").setStyle(ButtonStyle.Danger)
+    )] });
 };
 
 
