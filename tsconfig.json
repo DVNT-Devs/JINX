@@ -25,7 +25,8 @@
         "moduleResolution": "NodeNext",
         "skipLibCheck": true,
         "noImplicitReturns": false,
-        "checkJs": true
+        "checkJs": true,
+        "noImplicitAny": true
     },
     "include": ["src/**/*", "src/*", "src/config/main.d.ts", "src/config/main.ts"],
     "exclude": []

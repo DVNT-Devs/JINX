@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "build": "tsc",
+        "lint": "eslint src/**/*.ts",
         "dev": "rm -rf dist && eslint src/**/*.ts --fix && pnpm build && node --experimental-json-modules --enable-source-maps dist/index.js",
-        "force-dev": "rm -rf dist && pnpm build && node --experimental-json-modules --enable-source-maps dist/index.js",
         "start": "node --experimental-json-modules --enable-source-maps -r dotenv/config dist/index.js"
     },
     "keywords": [],

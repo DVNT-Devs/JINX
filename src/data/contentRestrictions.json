@@ -1,0 +1,66 @@
+{
+    "guild": "1147406597287579648",
+    "channels": {
+        "lewd": "1163488474922500146",
+        "lewdComments": "1163589835328585768",
+        "kinkyNsfw": "1163488341862396075",
+        "kinkyNsfwComments": "1163869538320920696",
+        "kinkySfw": "1163488292671594507",
+        "kinkySfwComments": "1163874204471525426",
+        "generalSfw": "1149162524042858536",
+        "generalNsfw": "1170758585601491074",
+        "quotes": "1196828953789354137",
+        "secrets": "1199018123127427082"
+    },
+    "reports": {
+        "${channels.lewd}": {
+            "guidelines": "https://discord.com/channels/1147406597287579648/1163488474922500146/1163589452069867602",
+            "rules": [
+                "✅ Breast & butt nudity is ok",
+                "🚫 No genital nudity or sex acts",
+                "😶‍🌫️ All content needs to be spoiled",
+                "💬 Reply to content in [Lewd Comments](<https://discord.com/channels/${guild}/${channels.lewdComments}>)"
+            ]
+        },
+        "${channels.kinkyNsfw}": {
+            "guidelines": "https://discord.com/channels/1147406597287579648/1163488341862396075/1163598071784034346",
+            "rules": [
+                "⛓️ Must have a distinguishable kink",
+                "😶‍🌫️ All content must be spoiled",
+                "❗ Include disclaimer (i.e. 'Blood')",
+                "💬 Reply to content in [NSFW Chat](<https://discord.com/channels/${guild}/${channels.kinkyNsfwComments}>)"
+            ]
+        },
+        "${channels.kinkySfw}": {
+            "guidelines": "https://discord.com/channels/1147406597287579648/1163488292671594507/1163598071784034346https://discord.com/channels/1147406597287579648/1163488292671594507/1163598250067103805",
+            "rules": [
+                "🚫 No blood, bruising, hard kinks, or nudity",
+                "⛓️ Must have a distinguishable kink",
+                "💬 Reply to content in [SFW Chat](<https://discord.com/channels/${guild}/${channels.kinkySfwComments}>)"
+            ]
+        },
+        "${channels.generalSfw}": {
+            "guidelines": "https://discord.com/channels/1147406597287579648/1149162524042858536/1149162524042858538",
+            "rules": [
+                "😇 Keep it SFW and friendly!",
+                "❤️ This isn't a private chat. Please include others",
+                "🚨 Go to [Horny Jail](<https://discord.com/channels/${guild}/${channels.generalNsfw}>) for flirting and horny talk"
+            ]
+        },
+        "${channels.quotes}": {
+            "rules": [
+                "❗ Community quotes only",
+                "❌ No discussions",
+                "💬 Reply in [Lewd Comments](<https://discord.com/channels/${guild}/${channels.lewdComments}>)"
+            ]
+        },
+        "${channels.secrets}": {
+            "guidelines": "https://canary.discord.com/channels/1147406597287579648/1199018123127427082/1199047737451233421",
+            "rules": [
+                "✅ Keep it fun & sexy",
+                "❌ No references to self-harm, violence, or non-consensual activities",
+                "👍 Follow server guidelines"
+            ]
+        }
+    }
+}
