@@ -35,8 +35,6 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
     let chosenRule: number | undefined;
     let suggestedChannel: string | undefined;
 
-    let DevMode = false;  //TODO
-
     while (!breakOut) {
         const ruleSelectMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
             .setCustomId("ruleSelectMenu")
@@ -59,13 +57,8 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
                 .setLabel("Cancel")
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
-                .setCustomId("sendButtonDev")
-                .setLabel("Send (Testing)")
-                .setStyle(ButtonStyle.Success)
-                .setDisabled(!chosenRule && !suggestedChannel),
-            new ButtonBuilder()
                 .setCustomId("sendButton")
-                .setLabel("Send (But like for real)")
+                .setLabel("Send")
                 .setStyle(ButtonStyle.Success)
                 .setDisabled(!chosenRule && !suggestedChannel)
         );
@@ -93,9 +86,6 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
         if (i.isButton()) {
             if (i.customId === "sendButton") {
                 readyToSend = true;
-            } else if (i.customId === "sendButtonDev") {
-                readyToSend = true;
-                DevMode = true;
             }
             breakOut = true;
         } else if (i.isStringSelectMenu()) {
@@ -118,31 +108,14 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
                 .setLabel("View rules")
                 .setStyle(ButtonStyle.Danger)
         )];
-        // if (suggestedChannel) components = [components[0]!.addComponents(
-        //     new ButtonBuilder()
-        //         .setLabel("Go to channel")
-        //         .setStyle(ButtonStyle.Link)
-        //         .setURL(`https://discord.com/channels/${interaction.guild!.id}/${suggestedChannel}`)
-        // )];
-        if (DevMode) {
-            await interaction.editReply({ embeds: [new EmbedBuilder()
-                .setTitle("Report Content")
-                .setDescription(
-                    "This is a development command - No action was taken.\n" +
-                    "The user would have seen this:\n\n" + embedText
-                )
-                .setColor(Colours.Success)
-            ], components});
-            return;
-        } else {
-            await interaction.channel?.send({ content: embedText, components });
-            await interaction.editReply({ embeds: [new EmbedBuilder()
-                .setTitle("Report Content")
-                .setDescription("The message has been reported.")
-                .setColor(Colours.Success)
-            ], components: []});
-            await interaction.targetMessage.delete();
-        }
+
+        await interaction.channel?.send({ content: embedText, components });
+        await interaction.editReply({ embeds: [new EmbedBuilder()
+            .setTitle("Report Content")
+            .setDescription("The message has been reported.")
+            .setColor(Colours.Success)
+        ], components: []});
+        await interaction.targetMessage.delete();
     } else {
         await interaction.editReply({embeds: [new EmbedBuilder()
             .setTitle("Report Content")
