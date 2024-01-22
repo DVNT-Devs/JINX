@@ -9,18 +9,22 @@ const dev = new SlashCommandBuilder()
 
 
 const callback = async (interaction: CommandInteraction) => {
-    await interaction.reply({components: [
+    await interaction.channel!.send({components: [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
+            // new ButtonBuilder()
+            //     .setCustomId("global:onboard")
+            //     .setLabel("global:onboard")
+            //     .setStyle(ButtonStyle.Primary),
+            // new ButtonBuilder()
+            //     .setCustomId("global:rules")
+            //     .setLabel("global:rules")
+            //     .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId("global:onboard")
-                .setLabel("global:onboard")
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId("global:rules")
-                .setLabel("global:rules")
-                .setStyle(ButtonStyle.Primary),
+                .setCustomId("global:secret")
+                .setLabel("Share a Secret")
+                .setStyle(ButtonStyle.Danger)
         )
-    ], ephemeral: true});
+    ]});
 };
 
 export {
