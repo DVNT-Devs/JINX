@@ -8,16 +8,16 @@ export default (discordClient: Client ) => {
     console.log("Reading commands folder");
     // const client_id = client.user!.id;
     // const guild_id = process.env["HOST_GUILD"];
-    const commandsFolder = path.join(__dirname, "commands");
+    const commandsFolder = path.join(__dirname, "..", "commands");
     const commandFiles = readdirSync(commandsFolder).filter(file => file.endsWith(".js"));
     const commands: (SlashCommandBuilder | ContextMenuCommandBuilder)[] = [];
 
-    const eventsFolder = path.join(__dirname, "events");
+    const eventsFolder = path.join(__dirname, "..", "events");
     const eventFiles = readdirSync(eventsFolder).filter(file => file.endsWith(".js"));
 
-    const messageContextFolder = path.join(__dirname, "context", "message");
+    const messageContextFolder = path.join(__dirname, "..", "context", "message");
     const messageContextFiles = readdirSync(messageContextFolder).filter(file => file.endsWith(".js"));
-    const userContextFolder = path.join(__dirname, "context", "user");
+    const userContextFolder = path.join(__dirname, "..", "context", "user");
     const userContextFiles = readdirSync(userContextFolder).filter(file => file.endsWith(".js"));
 
     (async () => {

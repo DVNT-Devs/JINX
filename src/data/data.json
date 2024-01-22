@@ -25,7 +25,8 @@
         "pinea": "438733159748599813",
         "saro": "427145734639321088",
         "cheff": "667128864044220459",
-        "chaosDwarf": "773175937264779265"
+        "chaosDwarf": "773175937264779265",
+        "sabah": "683511907600433223"
     },
 
     "praise": {
@@ -38,7 +39,7 @@
             "Wow, look at you!",
             "You're a pleasure to use",
             "God you're so sexy",
-            "All I want to do is watch you",
+            "All I want to do is watch squirm",
             "You deserve all the praise in the world",
             "God you're a dream",
             "Be a good slut and bend over for me",
@@ -65,7 +66,8 @@
             "You fit in well as a pink name",
             "You're adorable when you get flustered",
             "You're so cute when you hide your face",
-            "Aww, don't cry baby girl!!"
+            "Aww, don't cry baby girl!!",
+            "If this was a try not to hide your face challenge, you're failing"
         ],
         "${users.cheff}": [
             "Yes Cheff",
@@ -77,6 +79,9 @@
         ],
         "${users.chaosDwarf}": [
             "I enjoy watching you melt into a puddle, little candle"
+        ],
+        "${users.sabah}": [
+            "You're a good cocaine bear"
         ]
     },
     "degrade": {
@@ -91,6 +96,9 @@
         ],
         "${users.saro}": [
             "Don't you dare change from a pink name"
+        ],
+        "${users.sabah}": [
+            "You're just a toe-licking goat"
         ]
     },
     "mean": {

@@ -17,6 +17,7 @@ type detailedData = Record<string, detailedDataEntries>;
 
 const findDotSeparatedKey = (key: string, d: detailedData) => {
     const keys = key.split(".");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let value: any = d;
     for (const key of keys) {
         if (key in value) {
