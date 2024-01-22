@@ -35,6 +35,8 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
     let chosenRule: number | undefined;
     let suggestedChannel: string | undefined;
 
+    let DevMode = false;  //TODO
+
     while (!breakOut) {
         const ruleSelectMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
             .setCustomId("ruleSelectMenu")
@@ -57,17 +59,23 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
                 .setLabel("Cancel")
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
-                .setCustomId("sendButton")
-                .setLabel("Send")
+                .setCustomId("sendButtonDev")
+                .setLabel("Send (Testing)")
                 .setStyle(ButtonStyle.Success)
+                .setDisabled(!chosenRule && !suggestedChannel),
+            new ButtonBuilder()
+                .setCustomId("sendButton")
+                .setLabel("Send (But like for real)")
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(!chosenRule && !suggestedChannel)
         );
 
         await interaction.editReply({ embeds: [new EmbedBuilder()
             .setTitle("Report Content")
             .setDescription(
                 `You have selected [this message](${interaction.targetMessage.url}) by <@${interaction.targetMessage.author.id}>.\n` +
-                "You can select a rule this message  breaks, and optionally suggest a channel to move it to.\n" +
-                `Current rule selected: ${chosenRule ? ruleList[chosenRule] : "*None*"}\n` +
+                "You can select a rule this message breaks, and optionally suggest a channel to move it to.\n" +
+                `Current rule selected: ${chosenRule !== undefined ? ruleList[chosenRule] : "*None*"}\n` +
                 `Current suggested channel: ${suggestedChannel ? `<#${suggestedChannel}>` : "*None*"}`
             )
             .setColor(Colours.Warning)
@@ -85,6 +93,9 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
         if (i.isButton()) {
             if (i.customId === "sendButton") {
                 readyToSend = true;
+            } else if (i.customId === "sendButtonDev") {
+                readyToSend = true;
+                DevMode = true;
             }
             breakOut = true;
         } else if (i.isStringSelectMenu()) {
@@ -94,26 +105,44 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
         }
     }
     if (readyToSend) {
-        const ruleBroken = chosenRule ? (ruleList.map((rule, index) => {
-            return `${index + 1}. ${rule}`;
-        }).join("\n") + `\n\nIn particular, this content breaks rule ${chosenRule + 1}`) : "";
+        const preamble = `Hey there <@${interaction.targetMessage.author.id}>!\n` +
+            "Your post was removed for not following this channel's guidelines.";
+        const ruleBroken = chosenRule ? (
+            `Your post was marked for breaking rule ${chosenRule + 1}: ${ruleList[chosenRule]}.`
+        ) : "";
         const suggestedChannelText = suggestedChannel ? `This content would fit in better in <#${suggestedChannel}>.` : "";
-        const embedText = [ruleBroken, suggestedChannelText].filter((x) => x !== "").join("\n\n");
-        let components: ActionRowBuilder<ButtonBuilder>[] = [];
-        if (!ruleBroken) components = [new ActionRowBuilder<ButtonBuilder>().addComponents([
+        const embedText = [preamble, ruleBroken, suggestedChannelText].filter((x) => x !== "").join("\n");
+        const components: ActionRowBuilder<ButtonBuilder>[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId("global:rules")
                 .setLabel("View rules")
                 .setStyle(ButtonStyle.Danger)
-        ])];
-        await interaction.editReply({ embeds: [new EmbedBuilder()
-            .setTitle("Report Content")
-            .setDescription(
-                "This is a development command - No action was taken.\n" +
-                "The user would have seen this:\n\n" + embedText
-            )
-            .setColor(Colours.Success)
-        ], components});
+        )];
+        // if (suggestedChannel) components = [components[0]!.addComponents(
+        //     new ButtonBuilder()
+        //         .setLabel("Go to channel")
+        //         .setStyle(ButtonStyle.Link)
+        //         .setURL(`https://discord.com/channels/${interaction.guild!.id}/${suggestedChannel}`)
+        // )];
+        if (DevMode) {
+            await interaction.editReply({ embeds: [new EmbedBuilder()
+                .setTitle("Report Content")
+                .setDescription(
+                    "This is a development command - No action was taken.\n" +
+                    "The user would have seen this:\n\n" + embedText
+                )
+                .setColor(Colours.Success)
+            ], components});
+            return;
+        } else {
+            await interaction.channel?.send({ content: embedText, components });
+            await interaction.editReply({ embeds: [new EmbedBuilder()
+                .setTitle("Report Content")
+                .setDescription("The message has been reported.")
+                .setColor(Colours.Success)
+            ], components: []});
+            await interaction.targetMessage.delete();
+        }
     } else {
         await interaction.editReply({embeds: [new EmbedBuilder()
             .setTitle("Report Content")
@@ -123,4 +152,18 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
     }
 };
 
-export { command, callback };
+const rulesInChannel = async (interaction: ButtonInteraction) => {
+    // This triggers when someone presses the "View rules" button (global:rules)
+    const channelId = interaction.channel!.id as keyof typeof contentRestrictions.reports;
+    const restrictions = contentRestrictions.reports[channelId] as { guidelines?: string, rules: string[] };
+    const ruleList = restrictions.rules.map(x => x);
+    if (restrictions.guidelines) ruleList.push(guidelines(restrictions.guidelines));
+
+    await interaction.reply({ embeds: [new EmbedBuilder()
+        .setTitle("Rules in this channel")
+        .setDescription(ruleList.map((rule, index) => `${index + 1}. ${rule}`).join("\n"))
+        .setColor(Colours.Warning)
+    ], ephemeral: true });
+};
+
+export { command, callback, rulesInChannel };

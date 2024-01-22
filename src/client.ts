@@ -1,8 +1,8 @@
 import { Client, GatewayIntentBits, Interaction } from "discord.js";
 
 class JinxClient extends Client {
-    commands: Record<string, (interaction: any) => any> = {};
-    onInteractionHook: (interaction: Interaction) => any = () => { };
+    commands: Record<string, (interaction: Interaction) => unknown> = {};
+    onInteractionHook: (interaction: Interaction) => unknown = () => { };
 
     constructor() {
         super({ intents: [

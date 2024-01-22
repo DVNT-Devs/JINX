@@ -21,11 +21,13 @@ const insult = new SlashCommandBuilder()
 const callback = async (interaction: CommandInteraction) => {
     const user = interaction.options.getUser("user") || interaction.user;
     const target = interaction.guild!.members.cache.get(user.id) as GuildMember;
+    let id = target.id;
+    if (target.id === interaction.guild?.members.me!.id) id = interaction.user.id;
     const insultType = (interaction.options.get("type")?.value) as "mean" | "degrade" || "degrade";
 
     const response = responseFrom(target as GuildMember, insultType);
 
-    interaction.reply(`<@${target.id}>\n\n${response}`);
+    interaction.reply(`<@${id}>\n\n${response}`);
 };
 
 

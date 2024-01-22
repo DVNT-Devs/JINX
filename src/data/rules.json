@@ -2,7 +2,8 @@
     "channels": {
         "report": "1161826563843690497",
         "feedback": "1149216119593377802",
-        "sfw-kinky": "1163488341862396075"
+        "sfw-kinky": "1163488341862396075",
+        "secrets": "1199018123127427082"
     },
     "rules": {
         "Minors": [
@@ -100,14 +101,6 @@
     "extra": {
         "Content Warnings and Spoilers": [
             "[How do I spoiler images and text?](<https://support.discord.com/hc/en-us/articles/360022320632-Spoiler-Tags>)"
-        ],
-        "SFW Definition": [
-            "👙 Fully clothed",
-            "🚫 No nipples",
-            "🚫 No nude butts"
-        ],
-        "NSFW Definition": [
-            "🫦 Genital nudity"
         ],
         "Content Expectations": [
             "✅ Kinky",

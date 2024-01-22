@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import onboardingCallback from "../actions/onboard";
 
 
@@ -7,7 +7,7 @@ const onboard = new SlashCommandBuilder()
     .setDescription("Walks you through the roles in the server");
 
 
-const callback = async (interaction: any) => {
+const callback = async (interaction: CommandInteraction) => {
     await onboardingCallback(interaction, false);
 };
 

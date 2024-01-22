@@ -1,7 +1,7 @@
 import { ApplicationCommandType, Client, ContextMenuCommandBuilder, Events, Routes, SlashCommandBuilder } from "discord.js";
 import { readdirSync } from "fs";
 import path from "path";
-import client from "./client";
+import client from "../client";
 
 export default (discordClient: Client ) => {
     console.group("Command Registration");
@@ -17,8 +17,8 @@ export default (discordClient: Client ) => {
 
     const messageContextFolder = path.join(__dirname, "context", "message");
     const messageContextFiles = readdirSync(messageContextFolder).filter(file => file.endsWith(".js"));
-    // const userContextFolder = path.join(__dirname, "context", "user");
-    // const userContextFiles = readdirSync(userContextFolder).filter(file => file.endsWith(".js"));
+    const userContextFolder = path.join(__dirname, "context", "user");
+    const userContextFiles = readdirSync(userContextFolder).filter(file => file.endsWith(".js"));
 
     (async () => {
         for (const file of commandFiles) {
@@ -58,18 +58,18 @@ export default (discordClient: Client ) => {
             commands.push(context.command);
             console.log(`Registered message context ${context.command.name}`);
         }
-        // for (const file of userContextFiles) {
-        //     const filePath = path.join(userContextFolder, file);
-        //     const context = await import(filePath);
-        //     if (!context.command || !context.callback) {
-        //         console.error(`User context ${file} is missing a command or callback export`);
-        //         return;
-        //     }
-        //     context.command.setType(ApplicationCommandType.User);
-        //     client.commands["userContext." + context.command.name] = context.callback;
-        //     commands.push(context.command);
-        //     console.log(`Registered user context ${context.context}`);
-        // }
+        for (const file of userContextFiles) {
+            const filePath = path.join(userContextFolder, file);
+            const context = await import(filePath);
+            if (!context.command || !context.callback) {
+                console.error(`User context ${file} is missing a command or callback export`);
+                return;
+            }
+            context.command.setType(ApplicationCommandType.User);
+            client.commands["userContext." + context.command.name] = context.callback;
+            commands.push(context.command);
+            console.log(`Registered user context ${context.command.name}`);
+        }
 
         // Check if "--update-commands" is in the arguments
         if (process.argv.includes("--update-commands")) {
@@ -77,10 +77,10 @@ export default (discordClient: Client ) => {
                 console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
                 // The put method is used to fully refresh all commands in the guild with the current set
-                const commandData: any = await discordClient.rest.put(
+                const commandData: Array<unknown> = await discordClient.rest.put(
                     Routes.applicationGuildCommands(discordClient.user!.id, process.env["HOST_GUILD"] || ""),
                     { body: commands.map(command => command.toJSON()) }
-                );
+                ) as Array<unknown>;
                 console.log(`Successfully reloaded ${commandData.length} application (/) commands.`);
             } catch (error) {
                 // And of course, make sure you catch and log any errors!

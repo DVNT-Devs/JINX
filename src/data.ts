@@ -1,6 +1,6 @@
 // Load data.json
 import data from "./data/data.json";
-// import rules from "./data/rules.json";
+import rules from "./data/rules.json";
 import contentRestrictions from "./data/contentRestrictions.json";
 
 export const Colours = {
@@ -78,8 +78,13 @@ const fixKeys = (obj: detailedData, baseObj?: detailedData) => {
     return obj;
 };
 
-const fixedData = fixKeys(data);
+const fixedData = fixKeys(data) as typeof data;
 const fixedContentRestrictions = fixKeys(contentRestrictions) as typeof contentRestrictions;
+const fixedRules = fixKeys(rules) as typeof rules;
 
-export default fixedData as typeof data;
-export { fixedContentRestrictions as contentRestrictions };
+
+export default fixedData;
+export {
+    fixedContentRestrictions as contentRestrictions,
+    fixedRules as rules
+};

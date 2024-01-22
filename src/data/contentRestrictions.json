@@ -9,7 +9,8 @@
         "kinkySfwComments": "1163874204471525426",
         "generalSfw": "1149162524042858536",
         "generalNsfw": "1170758585601491074",
-        "quotes": "1196828953789354137"
+        "quotes": "1196828953789354137",
+        "secrets": "1199018123127427082"
     },
     "reports": {
         "${channels.lewd}": {
@@ -51,6 +52,14 @@
                 "❗ Community quotes only",
                 "❌ No discussions",
                 "💬 Reply in [Lewd Comments](<https://discord.com/channels/${guild}/${channels.lewdComments}>)"
+            ]
+        },
+        "${channels.secrets}": {
+            "guidelines": "https://canary.discord.com/channels/1147406597287579648/1199018123127427082/1199047737451233421",
+            "rules": [
+                "✅ Keep it fun & sexy",
+                "❌ No references to self-harm, violence, or non-consensual activities",
+                "👍 Follow server guidelines"
             ]
         }
     }

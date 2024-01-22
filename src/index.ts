@@ -1,7 +1,7 @@
 import { Events } from "discord.js";
 import client from "./client";
 import dotenv from "dotenv";
-import registerEvents from "./registerEvents";
+import registerEvents from "./actions/registerEvents";
 
 dotenv.config();
 
@@ -39,8 +39,21 @@ client.on(Events.InteractionCreate, async interaction => {
             }
         }
         return;
+    } else if (interaction.isUserContextMenuCommand()) {
+        const command = client.commands["userContext." + interaction.commandName];
+        if (!command) return;
+        try {
+            await command(interaction);
+        } catch (error) {
+            console.error(error);
+            if (interaction.deferred || interaction.replied) {
+                await interaction.editReply({ content: "There was an error while executing this command" });
+            } else {
+                await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+            }
+        }
+        return;
     }
-
     // If it wasn't caught here, pass it into the hook
     client.onInteractionHook(interaction);
 });
