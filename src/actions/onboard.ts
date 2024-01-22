@@ -19,7 +19,7 @@ interface Steps {
 
 const steps: Steps[] = [
     {
-        name: "Welcome",
+        name: "Hello!",
         text: "Welcome to DVNT!" // TODO
     },
     {
