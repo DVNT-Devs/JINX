@@ -39,12 +39,8 @@
             "Wow, look at you!",
             "You're a pleasure to use",
             "God you're so sexy",
-            "All I want to do is watch squirm",
             "You deserve all the praise in the world",
-            "God you're a dream",
-            "Be a good slut and bend over for me",
-            "Dripping for me, are you?",
-            "Ask nicely, little slut"
+            "God you're a dream"
         ],
         "${roles.dom}": [
             "You give the best cuddles",
@@ -53,10 +49,6 @@
             "I will take you any day of the week"
         ],
         "${roles.sub}": [
-            "I love the way you look when you're on your knees",
-            "Such a good little whore",
-            "That's my good little cumslut",
-            "Such a good little fuckdoll",
             "My pretty little needy whore",
             "You're my perfect little toy",
             "So well-behaved and on your knees",
@@ -86,13 +78,20 @@
     },
     "degrade": {
         "*": [
-            "*Placeholder text*"
+            "Dripping for me, are you?",
+            "Ask nicely, little slut",
+            "I love the way you look when you're on your knees",
+            "All I want to do is watch squirm",
+            "Who gave you permission to speak?",
+            "Don't make me punish you"
         ],
         "${roles.dom}": [
         ],
         "${roles.sub}": [
-            "Who gave you permission to speak?",
-            "Don't make me punish you"
+            "That's my good little cumslut",
+            "Such a good little fuckdoll",
+            "Such a good little whore",
+            "Be a good slut and bend over for me"
         ],
         "${users.saro}": [
             "Don't you dare change from a pink name"

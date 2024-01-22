@@ -5,14 +5,14 @@ import { responseFrom } from "../actions/randomResponses";
 
 
 const insult = new SlashCommandBuilder()
-    .setName("insult")
-    .setDescription("Insult a fellow member, or yourself")
+    .setName("degrade")
+    .setDescription("Degrade a fellow member, or yourself")
     .addStringOption(option => option
         .setName("type")
         .setDescription("The type of insult to use | Default: ")
         .addChoices(
-            { name: "Mean", value: "mean" },
-            { name: "Degradation", value: "degrade" }
+            { name: "Degradation", value: "degrade" },
+            { name: "Mean", value: "mean" }
         ).setRequired(false)
     )
     .addUserOption(option => option.setName("user").setDescription("The user to insult | Default: Yourself").setRequired(false));
