@@ -18,10 +18,10 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     if (interaction.isButton()) {
         await interaction.showModal(new ModalBuilder()
             .setCustomId("text")
-            .setTitle("Share your Secret")
+            .setTitle("Share A Secret")
             .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
                 .setCustomId("secret")
-                .setLabel("Share your secret")
+                .setLabel("Share A secret")
                 .setMaxLength(2000)
                 .setStyle(TextInputStyle.Short)
                 .setRequired(false)
