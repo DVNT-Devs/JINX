@@ -18,10 +18,10 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     if (interaction.isButton()) {
         await interaction.showModal(new ModalBuilder()
             .setCustomId("text")
-            .setTitle("Share A Secret")
+            .setTitle("Share a Secret")
             .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
                 .setCustomId("secret")
-                .setLabel("Share A secret")
+                .setLabel("Share a secret")
                 .setMaxLength(2000)
                 .setStyle(TextInputStyle.Short)
                 .setRequired(false)
@@ -99,7 +99,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     await bulkDeleteChannel.bulkDelete(messages.filter(m => m.author.id === interaction.client.user!.id && m.components.length > 0));
     // Then send a new message with a button
     await interaction.channel!.send({ components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId("global:secret").setLabel("Share your Secret").setStyle(ButtonStyle.Danger)
+        new ButtonBuilder().setCustomId("global:secret").setLabel("Share a Secret").setStyle(ButtonStyle.Danger)
     )] });
 };
 
