@@ -45,7 +45,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     if (interaction.channelId !== rules.channels.secrets) {
         await i.reply({ embeds: [new EmbedBuilder()
             .setTitle("Wrong Channel")
-            .setDescription(`Please use this command in <#${rules.channels.secrets}>. It shouldn't even be possible to do this...`)
+            .setDescription(`Please use this command in <#${rules.channels.secrets}>.`)
             .setColor(Colours.Danger)
         ], ephemeral: true});
         return;
