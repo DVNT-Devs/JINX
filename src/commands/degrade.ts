@@ -7,6 +7,7 @@ import { responseFrom } from "../actions/randomResponses";
 const insult = new SlashCommandBuilder()
     .setName("degrade")
     .setDescription("Degrade a fellow member, or yourself")
+    .addUserOption(option => option.setName("user").setDescription("The user to insult | Default: Yourself").setRequired(false))
     .addStringOption(option => option
         .setName("type")
         .setDescription("The type of insult to use | Default: ")
@@ -14,8 +15,7 @@ const insult = new SlashCommandBuilder()
             { name: "Degradation", value: "degrade" },
             { name: "Mean", value: "mean" }
         ).setRequired(false)
-    )
-    .addUserOption(option => option.setName("user").setDescription("The user to insult | Default: Yourself").setRequired(false));
+    );
 
 
 const callback = async (interaction: CommandInteraction) => {
