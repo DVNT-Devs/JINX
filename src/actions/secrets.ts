@@ -3,7 +3,7 @@
 import { promises as fs } from "fs";
 import { join } from "path";
 
-const secretsPath = join(__dirname, "..", "..", "secrets.json");
+const secretsPath = join(__dirname, "..", "..", "globals", "secrets.json");
 // If the file doesn't exist, create it
 fs.access(secretsPath).catch(() => fs.writeFile(secretsPath, "{}"));
 
