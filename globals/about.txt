@@ -1,0 +1,2 @@
+This folder contains files which should remain across builds
+This is because they contain important data (secrets.json), or to reduce the size of API requests (phishing.json)

@@ -2,12 +2,16 @@ import { Events } from "discord.js";
 import client from "./client";
 import dotenv from "dotenv";
 import registerEvents from "./actions/registerEvents";
+import { updatePhishing } from "./phishing";
 
 dotenv.config();
 
 // Run once when the bot starts up
 client.once(Events.ClientReady, discordClient => {
     registerEvents(discordClient);
+    updatePhishing().then(domains => {
+        client.phishing = domains;
+    });
 });
 
 client.on(Events.InteractionCreate, async interaction => {
