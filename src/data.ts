@@ -13,6 +13,7 @@ export const Colours = {
 type dataEntries = string | object | undefined;
 type detailedDataEntries = dataEntries | dataEntries[] | Record<string, dataEntries> | Record<string, dataEntries>[];
 type detailedData = Record<string, detailedDataEntries>;
+export { detailedData }
 
 
 const findDotSeparatedKey = (key: string, d: detailedData) => {
@@ -23,7 +24,7 @@ const findDotSeparatedKey = (key: string, d: detailedData) => {
         if (key in value) {
             value = value[key];
         } else {
-            return "";
+            return "/Key not found/";
         }
     }
     return value;
