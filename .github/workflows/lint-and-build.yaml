@@ -12,6 +12,6 @@ jobs:
     - name: Install modules
       run: pnpm i
     - name: Run ESLint
-      run: pnpm run eslint src --fix
+      run: pnpm run lint
     - name: Run TypeScript
       run: tsc
