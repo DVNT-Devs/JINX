@@ -9,7 +9,7 @@ dotenv.config();
 // Run once when the bot starts up
 client.once(Events.ClientReady, discordClient => {
     registerEvents(discordClient);
-    updatePhishing().then(domains => {
+    void updatePhishing().then(domains => {
         client.phishing = domains;
     });
 });
@@ -72,4 +72,4 @@ process.on("uncaughtException", (err) => {
 });
 
 // Log in to Discord with your client's token
-client.login(process.env["TOKEN"]);
+void client.login(process.env["TOKEN"]);
