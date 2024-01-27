@@ -1,9 +1,28 @@
 import { GuildMember } from "discord.js";
 import data from "../data";
+import { readFileSync } from "fs";
+import { join } from "path";
 
+const domRole = data.roles.dom;
+const subRole = data.roles.sub;
+
+const suggestionsPath = join(__dirname, "..", "..", "globals", "suggestions.json");
 
 const responseFrom = (target: GuildMember, listName: keyof typeof data) => {
     const wordList = data[listName] as Record<string, string[]>;
+
+    // Add suggested phrases live (if suggested, they should be added to the list immediately)
+    const suggestedPhrases = JSON.parse(readFileSync(suggestionsPath, "utf-8"))[listName] as Record<string, string[]>;
+    if (suggestedPhrases) {
+        // There will be a list of "dom", "sub", and "everyone" phrases
+        // Add "everyone" to wordList["*"]
+        wordList["*"] = (wordList["*"] || []).concat(suggestedPhrases["everyone"] || []);
+        // Add "dom" to wordList[domRole]
+        wordList[domRole] = (wordList[domRole] || []).concat(suggestedPhrases["dom"] || []);
+        // Add "sub" to wordList[subRole]
+        wordList[subRole] = (wordList[subRole] || []).concat(suggestedPhrases["sub"] || []);
+    }
+
     const allPhrases = wordList["*"] || [];
     let customPhrases: string[] = [];
 

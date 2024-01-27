@@ -10,7 +10,7 @@ const insult = new SlashCommandBuilder()
     .addUserOption(option => option.setName("user").setDescription("The user to insult | Default: Yourself").setRequired(false))
     .addStringOption(option => option
         .setName("type")
-        .setDescription("The type of insult to use | Default: ")
+        .setDescription("The type of insult to use | Default: degrade")
         .addChoices(
             { name: "Degradation", value: "degrade" },
             { name: "Mean", value: "mean" }
