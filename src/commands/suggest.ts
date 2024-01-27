@@ -121,6 +121,7 @@ export async function denySuggestion(interaction: ButtonInteraction): Promise<vo
         .setTitle("Suggestion denied")
         .setDescription(embed.description + `\nDenied by <@${interaction.user.id}> <t:${Math.floor(Date.now() / 1000)}:R>`)
         .setColor(Colours.Danger)
+        .setFields(embed.fields)
     ], components: [] });
 }
 

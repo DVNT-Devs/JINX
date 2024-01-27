@@ -6,4 +6,5 @@ pnpm-lock.yaml
 
 secrets.json
 phishing.json
+suggestions.json
 coverage
