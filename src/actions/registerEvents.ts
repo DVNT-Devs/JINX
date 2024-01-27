@@ -20,7 +20,7 @@ export default (discordClient: Client ) => {
     const userContextFolder = path.join(__dirname, "..", "context", "user");
     const userContextFiles = readdirSync(userContextFolder).filter(file => file.endsWith(".js"));
 
-    (async () => {
+    void (async () => {
         for (const file of commandFiles) {
             const filePath = path.join(commandsFolder, file);
             const command = await import(filePath);

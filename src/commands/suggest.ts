@@ -59,7 +59,7 @@ const emptyData: data = {
 
 fs.access(suggestionsPath).catch(() => fs.writeFile(suggestionsPath, JSON.stringify(emptyData, null, 2)));
 // Check if any keys are missing
-fs.readFile(suggestionsPath, "utf-8").then(data => {
+void fs.readFile(suggestionsPath, "utf-8").then(data => {
     const suggestions = JSON.parse(data) as typeof emptyData;
     for (const category of Object.keys(emptyData)) {
         for (const target of Object.keys(emptyData[category as categories])) {
@@ -68,7 +68,7 @@ fs.readFile(suggestionsPath, "utf-8").then(data => {
             }
         }
     }
-    fs.writeFile(suggestionsPath, JSON.stringify(suggestions, null, 2));
+    void fs.writeFile(suggestionsPath, JSON.stringify(suggestions, null, 2));
 });
 
 async function logSuggestion(
@@ -166,7 +166,7 @@ const callback = async (interaction: CommandInteraction) => {
             .setLabel("Deny")
             .setStyle(ButtonStyle.Danger)
     )] });
-    interaction.reply({ embeds: [new EmbedBuilder()
+    void interaction.reply({ embeds: [new EmbedBuilder()
         .setTitle("Suggestion sent")
         .setDescription("Your suggestion has been sent to the moderators for approval!")
         .setColor(Colours.Success)

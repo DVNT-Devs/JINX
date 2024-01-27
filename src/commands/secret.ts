@@ -75,12 +75,12 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
         return;
     }
     if (!i) return;
-    button.deferUpdate();
+    void button.deferUpdate();
     if (button.customId !== "agree") return;
 
     const channel = interaction.guild!.channels.cache.get(rules.channels.secrets)! as GuildTextBasedChannel;
     const message = await channel.send(`*Anonymous said*: "${secret}"`);
-    logSecret(channel.id, message.id, interaction.user.id);
+    void logSecret(channel.id, message.id, interaction.user.id);
     await i.editReply({ embeds: [new EmbedBuilder()
         .setTitle("Secret Sent")
         .setDescription(`Your secret has been sent to the server. [Click here to view it.](${message.url})`)

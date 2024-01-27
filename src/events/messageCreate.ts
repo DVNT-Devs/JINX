@@ -29,7 +29,7 @@ const callback = async (message: Message) => {
                     .setFooter({text: "This message will be deleted in 20 seconds"})
                     .setColor(Colours.Danger)
                 ], content: `<@${message.author.id}>`});
-                setTimeout(() => m.delete(), 20 * 1000);
+                setTimeout(() => void m.delete(), 20 * 1000);
                 return;
             }
         }
@@ -38,7 +38,7 @@ const callback = async (message: Message) => {
     if (Object.keys(triggers).includes(lowerContent)) {
         const response = triggers[lowerContent];
         if (response) {
-            message.reply(response);
+            void message.reply(response);
         }
     }
 };
