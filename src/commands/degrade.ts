@@ -29,7 +29,7 @@ const callback = async (interaction: CommandInteraction) => {
     const userRoles = interaction.guild?.members.cache.get(interaction.user.id)?.roles.cache.map(role => role.id);
     if (userRoles?.some(role => data.roles.sub.includes(role))) {
         // Add a slim chance of the sub being punished
-        const backfire = Math.random() < 0.1;
+        const backfire = Math.random() < 0.25;
         if (backfire) {
             message = backfireResponse(target.id);
             target = interaction.guild!.members.cache.get(interaction.user.id) as GuildMember;
