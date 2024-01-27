@@ -8,9 +8,9 @@ const phrases: string[][] = [
     [
         "Especially not",
         "You should be degrading yourself, not",
-        "You're not allowed to degrade",
-        "You don't have the right to degrade",
-        "Why do you think you can degrade",
+        "You aren't allowed to try and bully",
+        "You don't have the *right* to say mean things to",
+        "Why do you think you can bully",
     ]
 ];
 
