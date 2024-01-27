@@ -28,6 +28,9 @@
         "checkJs": true,
         "noImplicitAny": true
     },
+    "parserOptions": {
+        "tsconfigRootDir": "./"
+    },
     "include": ["src/**/*", "src/*", "src/config/main.d.ts", "src/config/main.ts"],
-    "exclude": []
+    "exclude": ["babel.config.js"]
 }
