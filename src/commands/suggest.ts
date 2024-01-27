@@ -30,6 +30,7 @@ const insult = new SlashCommandBuilder()
     .addStringOption(option => option
         .setName("phrase")
         .setDescription("The phrase you're suggesting")
+        .setMaxLength(280)
         .setRequired(true)
     );
 
