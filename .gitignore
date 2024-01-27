@@ -8,3 +8,14 @@ secrets.json
 phishing.json
 suggestions.json
 coverage
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+

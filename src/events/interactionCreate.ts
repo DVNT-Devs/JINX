@@ -6,14 +6,14 @@ import { denySuggestion, approveSuggestion } from "../commands/suggest";
 
 const event = "interactionCreate";
 
-const callback = (interaction: Interaction) => {
+const callback = async (interaction: Interaction) => {
     if (interaction.isButton()) {
         const id = interaction.customId;
-        if (id === "global:onboard") { onboardCallback(interaction, true); }
-        else if (id === "global:rules") { rulesInChannel(interaction); }
-        else if (id === "global:secret") { secretCallback(interaction); }
-        else if (id.startsWith("global:mod/deny")) { denySuggestion(interaction); }
-        else if (id.startsWith("global:mod/approve")) { approveSuggestion(interaction); }
+        if (id === "global:onboard") { await onboardCallback(interaction, true); }
+        else if (id === "global:rules") { await rulesInChannel(interaction); }
+        else if (id === "global:secret") { await secretCallback(interaction); }
+        else if (id.startsWith("global:mod/deny")) { await denySuggestion(interaction); }
+        else if (id.startsWith("global:mod/approve")) { await approveSuggestion(interaction); }
     }
 };
 

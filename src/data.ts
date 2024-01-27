@@ -13,7 +13,7 @@ export const Colours = {
 type dataEntries = string | object | undefined;
 type detailedDataEntries = dataEntries | dataEntries[] | Record<string, dataEntries> | Record<string, dataEntries>[];
 type detailedData = Record<string, detailedDataEntries>;
-export { detailedData }
+export { detailedData };
 
 
 const findDotSeparatedKey = (key: string, d: detailedData) => {

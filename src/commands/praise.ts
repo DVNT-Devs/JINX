@@ -18,7 +18,7 @@ const callback = async (interaction: CommandInteraction) => {
 
     const response = responseFrom(target as GuildMember, "praise");
 
-    interaction.reply(`<@${id}>\n\n${response}`);
+    void interaction.reply(`<@${id}>\n\n${response}`);
 };
 
 
