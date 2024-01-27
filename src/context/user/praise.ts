@@ -13,7 +13,7 @@ const callback = async (interaction: UserContextMenuCommandInteraction) => {
 
     const response = responseFrom(target as GuildMember, "praise");
 
-    interaction.reply(`<@${id}>\n\n${response}`);
+    await interaction.reply(`<@${id}>\n\n${response}`);
 };
 
 export { command, callback };
