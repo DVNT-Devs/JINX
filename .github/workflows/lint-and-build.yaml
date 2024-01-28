@@ -16,4 +16,4 @@ jobs:
     - name: Run TypeScript
       run: tsc
     - name: Run Unit Tests
-      run: pnpm run test:github
+      run: pnpm run test
