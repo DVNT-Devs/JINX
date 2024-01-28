@@ -31,6 +31,6 @@
     "parserOptions": {
         "tsconfigRootDir": "./"
     },
-    "include": ["src/**/*", "src/*", "src/config/main.d.ts", "src/config/main.ts"],
+    "include": ["src/**/*", "src/*"],
     "exclude": ["babel.config.js"]
 }
