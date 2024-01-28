@@ -12,7 +12,7 @@ const responseFrom = (target: GuildMember, listName: keyof typeof data) => {
     const wordList = data[listName] as Record<string, string[]>;
 
     // Add suggested phrases live (if suggested, they should be added to the list immediately)
-    const suggestedPhrases = JSON.parse(readFileSync(suggestionsPath, "utf-8"))[listName] as Record<string, string[]>;
+    const suggestedPhrases = JSON.parse(readFileSync(suggestionsPath, "utf-8") || "{}")[listName] as Record<string, string[]>;
     if (suggestedPhrases) {
         // There will be a list of "dom", "sub", and "everyone" phrases
         // Add "everyone" to wordList["*"]
