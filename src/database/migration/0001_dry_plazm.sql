@@ -1,0 +1,2 @@
+ALTER TABLE "relationships" ADD CONSTRAINT "relationships_dom_id_sub_id_pk" PRIMARY KEY("dom_id","sub_id");--> statement-breakpoint
+ALTER TABLE "punishments" ADD COLUMN "punishment_id" uuid DEFAULT gen_random_uuid() NOT NULL;

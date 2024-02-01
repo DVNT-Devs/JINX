@@ -8,10 +8,12 @@
         "lint": "eslint src --fix",
         "dev": "rm -rf dist && pnpm lint && pnpm build && node --experimental-json-modules --enable-source-maps dist/index.js",
         "start": "node --experimental-json-modules --enable-source-maps -r dotenv/config dist/index.js",
+
         "_test": "jest --detectOpenHandles --forceExit --silent $@",
         "test": "pnpm build && pnpm _test",
         "test:src": "pnpm _test src",
         "test:dist": "pnpm build && pnpm _test dist",
+
         "drizzle:start": "rm -rf .devenv && devenv up",
         "drizzle:studio": "pnpm drizzle-kit studio --config=./src/drizzle.config.ts",
         "drizzle:update": "pnpm drizzle-kit generate:pg --config=./src/drizzle.config.ts"
