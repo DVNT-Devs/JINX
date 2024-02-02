@@ -26,7 +26,8 @@
         "saro": "427145734639321088",
         "cheff": "667128864044220459",
         "chaosDwarf": "773175937264779265",
-        "sabah": "683511907600433223"
+        "sabah": "683511907600433223",
+        "joeShoe": "176921309203267584"
     },
 
     "praise": {
@@ -44,7 +45,7 @@
             "Good job! You're so cute right now!",
             "Who's looking so cute today! Is it you? It must be!",
             "You deserve some cuddles",
-            "Looking like a real snack right now!",
+            "You're looking like a real snack right now!",
             "You deserve a treat!"
         ],
         "${roles.dom}": [
@@ -56,10 +57,10 @@
         "${roles.sub}": [
             "My pretty little needy whore",
             "You're my perfect little toy",
-            "So well-behaved and on your knees",
+            "You're so well-behaved and on your knees",
             "I love hearing you whimper",
             "Good pet; you're chatting so gracefully",
-            "Who's a good little sub??? That's right it's you!",
+            "Who's a good little sub? That's right it's you!",
             "Wow I bet you stay hydrated like a good sub!",
             "You should be collared up just for me that's how valuable you are"
         ],
@@ -154,6 +155,14 @@
             "Your face would make an onion cry",
             "Don't be ashamed of who you are.That's your parents' job",
             "You're about as bright as a cave"
+        ]
+    },
+    "exemptions": {
+        "praise": [
+            "${users.joeShoe}"
+        ],
+        "degrade": [
+            "${users.joeShoe}"
         ]
     },
     "triggers": {
