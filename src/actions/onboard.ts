@@ -61,15 +61,31 @@ const steps: Steps[] = [
         maxRoles: 1
     },
     {
+        name: "Events and Extras",
+        text: "Select some roles for things you're interested in!",
+        roleOptions: [
+            { name: "Programmer / Developer", roleId: data.roles.developer, emoji: "💻" },
+            { name: "Game Nights", roleId: data.roles.events.game, emoji: "🎲" },
+        ],
+    },
+    {
         name: "Onboarding complete!",
         text: "You're all set! Welcome to DVNT!"
     }
 ];
 
 const callback = async (interaction: CommandInteraction | ButtonInteraction, skipWelcome: boolean) => {
+    const memberList = await interaction.guild!.members.fetch();
     const localSteps = steps.map(x => x);
     if (skipWelcome) localSteps.shift();
+    const memberRoles = (interaction.member!.roles as GuildMemberRoleManager).cache.map(r => r.id);
+    // Find the first step where the user doesn't have any of the roles
+    // If they have roles in every one, go to the last step
+    // If they have none, go to the first step
     let step = 0;
+    const roleInStep = localSteps.map(step => step.roleOptions?.some(r => memberRoles.includes(r.roleId)));
+    step = roleInStep.indexOf(false);
+    if (step === -1) step = localSteps.length - 2;
     const m = await interaction.reply({ embeds: [new EmbedBuilder()
         .setTitle("One moment...")
         .setColor(0xF27878)
@@ -87,10 +103,13 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
                 .setMinValues(1)
                 .setMaxValues(stepData.maxRoles || stepData.roleOptions.length);
             for (const roleOption of stepData.roleOptions) {
+                const hasRole = userRoleIDs.includes(roleOption.roleId);
+                const membersWithRole = memberList.filter(m => m.roles.cache.has(roleOption.roleId)).size;
                 const option = new StringSelectMenuOptionBuilder()
                     .setLabel(roleOption.name)
-                    .setValue(roleOption.roleId)
-                    .setDefault(userRoleIDs.includes(roleOption.roleId))
+                    .setValue(roleOption.roleId || "unset")
+                    .setDescription(hasRole ? `You and ${membersWithRole} others` : `${membersWithRole} members`)
+                    .setDefault(hasRole)
                     .setEmoji(parseEmoji(roleOption.emoji)! as APIMessageComponentEmoji);
                 if (roleOption.description) option
                     .setDescription(roleOption.description);
@@ -119,13 +138,9 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
         const components = [];
         if (roleDropdown) components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(roleDropdown));
         components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(controls));
-        const rolesThisPage: string[] = roleDropdown ? stepData.roleOptions!.map(r => r.roleId) : [];
-        const current = userRoleIDs.filter(r => rolesThisPage.includes(r)).length;
-        const plural = current === 1 ? "" : "s";
-
         await interaction.editReply({ embeds: [new EmbedBuilder()
             .setTitle(stepData.name)
-            .setDescription((stepData.text || "") + "\n\n" + (roleDropdown ? `You have currently have ${current} role${plural}` : ""))
+            .setDescription(stepData.text || "")
             .setColor(0xF27878)
         ], components: components });
 
