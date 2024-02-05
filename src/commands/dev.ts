@@ -1,6 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
-import { ButtonStyle, CommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-
+import { join } from "path";
+import { CommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { readFile } from "fs/promises";
 
 const dev = new SlashCommandBuilder()
     .setName("dev")
@@ -8,23 +8,19 @@ const dev = new SlashCommandBuilder()
     .setDescription("Please don't use this command!");
 
 
+const commitPath = join(__dirname, "..", "commit.txt");
+
 const callback = async (interaction: CommandInteraction) => {
-    await interaction.channel!.send({components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-            // new ButtonBuilder()
-            //     .setCustomId("global:onboard")
-            //     .setLabel("global:onboard")
-            //     .setStyle(ButtonStyle.Primary),
-            // new ButtonBuilder()
-            //     .setCustomId("global:rules")
-            //     .setLabel("global:rules")
-            //     .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId("global:secret")
-                .setLabel("Share a Secret")
-                .setStyle(ButtonStyle.Danger)
-        )
-    ]});
+    // Read the ~/commit.txt file
+    const info = (await readFile(commitPath, "utf-8")).split("\n");
+    const [ commit, author ] = info.map(i => i.split(" "));
+    const hash = commit!.shift();
+    const message = commit!.join(" ");
+    await interaction.reply({
+        content: `The current commit is: \`${hash}\`\n` +
+            `> ${message}\n` +
+            `> by ${author!.join(" ")}`,
+        ephemeral: true });
 };
 
 export {
