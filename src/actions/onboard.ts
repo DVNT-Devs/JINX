@@ -88,7 +88,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
     let step = 0;
     const roleInStep = localSteps.map(step => step.roleOptions?.some(r => memberRoles.includes(r.roleId)));
     step = roleInStep.indexOf(false);
-    if (step === -1) step = localSteps.length - 2;
+    if (step === -1) step = localSteps.length - 1;
     const m = await interaction.reply({ embeds: [new EmbedBuilder()
         .setTitle("One moment...")
         .setColor(0xF27878)
