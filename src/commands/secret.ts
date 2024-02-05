@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder } from "@discordjs/builders";
-import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel, ModalSubmitInteraction, TextInputStyle } from "discord.js";
+import { ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel, ModalSubmitInteraction, TextInputStyle } from "discord.js";
 import { Colours, rules } from "../data";
 import { logSecret } from "../actions/secrets";
 
@@ -9,8 +9,6 @@ const praise = new SlashCommandBuilder()
     .setDescription("Tell a secret to the server")
     .addStringOption(option => option.setName("secret").setDescription("The secret to tell").setRequired(true).setMaxLength(1000));
 
-
-const tickEmoji = "947441964234702849";
 
 const callback = async (interaction: CommandInteraction | ButtonInteraction) => {
     let secret;
@@ -42,23 +40,27 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
         secret = interaction.options.get("secret")!.value as string;
         i = interaction;
     }
-    if (interaction.channelId !== rules.channels.secrets) {
+    const inSecretsChannel = interaction.channelId === rules.channels.secrets;
+    console.log(interaction.channelId, inSecretsChannel, rules.channels.secrets);
+    const inConfessionsCategory = interaction.channel?.isThread() && interaction.channel.parentId === rules.channels.confessions;
+    if (!inSecretsChannel && !inConfessionsCategory) {
         await i.reply({ embeds: [new EmbedBuilder()
             .setTitle("Wrong Channel")
-            .setDescription(`Please use this command in <#${rules.channels.secrets}>.`)
+            .setDescription(`Please use this command in <#${rules.channels.secrets}> or <#${rules.channels.confessions}>.`)
             .setColor(Colours.Danger)
         ], ephemeral: true});
         return;
     }
+    const prompt = inSecretsChannel ? "Secret" : "Confession";
     const messageData = { embeds: [new EmbedBuilder()
-        .setTitle("Secret")
+        .setTitle(prompt)
         .setDescription(
             `**Preview:**\n> ${secret}\n\n` +
             "**Rules:**\n" +
             "✅ Keep it fun and sexy\n" +
             "❌ No references to self-harm, violence, or non-consensual activities\n" +
             "👍 Follow server guidelines\n" +
-            "\n**Warning:**\nYou will not be able to edit or delete this secret once it is sent. (Only moderators can delete secrets.)" +
+            `\n**Warning:**\nYou will not be able to edit or delete this ${prompt.toLowerCase()} once it is sent. (Only moderators can delete it.)` +
             "\n\nIf you understand this and still want to send it, click the button below."
         )
         .setColor(Colours.Warning)
@@ -78,20 +80,12 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     void button.deferUpdate();
     if (button.customId !== "agree") return;
 
-    const channel = interaction.guild!.channels.cache.get(rules.channels.secrets)! as GuildTextBasedChannel;
+    const channel = interaction.channel as GuildTextBasedChannel;
     const message = await channel.send(`*Anonymous said*: "${secret}"`);
     void logSecret(channel.id, message.id, interaction.user.id);
-    await i.editReply({ embeds: [new EmbedBuilder()
-        .setTitle("Secret Sent")
-        .setDescription(`Your secret has been sent to the server. [Click here to view it.](${message.url})`)
-        .setColor(Colours.Success)
-    ], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder()
-        .setCustomId("disabled")
-        .setDisabled(true)
-        .setLabel("Agree and Send")
-        .setStyle(ButtonStyle.Success)
-        .setEmoji({ id: tickEmoji, name: "tick" } as APIMessageComponentEmoji)
-    )]});
+    await i.deleteReply();
+
+    if (inConfessionsCategory) return;
 
     // Purge any messages from the bot with components
     const messages = await interaction.channel!.messages.fetch({ limit: 10 });
