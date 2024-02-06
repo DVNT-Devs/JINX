@@ -4,6 +4,7 @@ class JinxClient extends Client {
     commands: Record<string, (interaction: Interaction) => unknown> = {};
     onInteractionHook: (interaction: Interaction) => unknown = () => { };
     phishing: string[] = [];
+    purgeLock: boolean = false;
 
     constructor() {
         super({ intents: [
