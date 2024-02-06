@@ -9,7 +9,6 @@ export default async (client: JinxClient) => {
     if (client.purgeLock) return;
     client.purgeLock = true;
     const guild = client.guilds.cache.get(process.env["HOST_GUILD"] || "")!;
-    const roleToGive = "1202731550060445777";
     const verifiedRole = "1164256198489538653";
     const members = await guild.members.fetch();
 
@@ -23,14 +22,14 @@ export default async (client: JinxClient) => {
         if (unverifiedMembers[i] === undefined) return;
         const currentMember = unverifiedMembers[i] as [string, GuildMember];
         const [id, fetchedMember] = currentMember;
-        console.log(`Kicking ${fetchedMember.user.tag}...`);
+        console.log(`\x1b[31mKicking ${fetchedMember.user.tag}...\x1b0`);
         // If fetchedMember is undefined, use the id
         if (!fetchedMember) {
             const fetchedMember = await guild.members.fetch(id);
             if (!fetchedMember) return;
-            await fetchedMember.kick(roleToGive);
+            await fetchedMember.kick();
         } else {
-            await fetchedMember.kick(roleToGive);
+            await fetchedMember.kick();
         }
     };
 
