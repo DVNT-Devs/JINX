@@ -3,7 +3,7 @@ import client from "./client";
 import dotenv from "dotenv";
 import registerEvents from "./actions/registerEvents";
 import { updatePhishing } from "./phishing";
-import kickUnverified from "./actions/kickUnverified";
+// import kickUnverified from "./actions/kickUnverified";
 
 dotenv.config();
 
