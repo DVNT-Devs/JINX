@@ -12,6 +12,7 @@ class JinxClient extends Client {
             GatewayIntentBits.GuildMembers,
             GatewayIntentBits.MessageContent,
             GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildModeration
         ] });
     }
 }
