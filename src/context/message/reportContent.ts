@@ -60,7 +60,7 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
                 .setCustomId("sendButton")
                 .setLabel("Send")
                 .setStyle(ButtonStyle.Success)
-                .setDisabled(!(chosenRule === undefined) && !suggestedChannel)
+                .setDisabled((chosenRule === undefined) && !(suggestedChannel))
         );
 
         await interaction.editReply({ embeds: [new EmbedBuilder()
