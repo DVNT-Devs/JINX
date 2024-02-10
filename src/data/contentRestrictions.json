@@ -3,14 +3,13 @@
     "channels": {
         "lewd": "1163488474922500146",
         "lewdComments": "1163589835328585768",
-        "kinkyNsfw": "1163488341862396075",
-        "kinkyNsfwComments": "1163869538320920696",
-        "kinkySfw": "1163488292671594507",
-        "kinkySfwComments": "1163874204471525426",
+        "kinkyPics": "1163488341862396075",
+        "kinkyComments": "1163869538320920696",
         "generalSfw": "1149162524042858536",
         "generalNsfw": "1170758585601491074",
         "quotes": "1196828953789354137",
-        "secrets": "1199018123127427082"
+        "secrets": "1199018123127427082",
+        "banLogs": "1162409007835775151"
     },
     "reports": {
         "${channels.lewd}": {
@@ -22,21 +21,13 @@
                 "💬 Reply to content in [Lewd Comments](<https://discord.com/channels/${guild}/${channels.lewdComments}>)"
             ]
         },
-        "${channels.kinkyNsfw}": {
+        "${channels.kinkyPics}": {
             "guidelines": "https://discord.com/channels/1147406597287579648/1163488341862396075/1163598071784034346",
             "rules": [
                 "⛓️ Must have a distinguishable kink",
-                "😶‍🌫️ All content must be spoiled",
+                "😶‍🌫️ NSFW content must be spoiled",
                 "❗ Include disclaimer (i.e. 'Blood')",
-                "💬 Reply to content in [NSFW Chat](<https://discord.com/channels/${guild}/${channels.kinkyNsfwComments}>)"
-            ]
-        },
-        "${channels.kinkySfw}": {
-            "guidelines": "https://discord.com/channels/1147406597287579648/1163488292671594507/1163598071784034346https://discord.com/channels/1147406597287579648/1163488292671594507/1163598250067103805",
-            "rules": [
-                "🚫 No blood, bruising, hard kinks, or nudity",
-                "⛓️ Must have a distinguishable kink",
-                "💬 Reply to content in [SFW Chat](<https://discord.com/channels/${guild}/${channels.kinkySfwComments}>)"
+                "💬 Reply to content in <#${channels.kinkyComments}>"
             ]
         },
         "${channels.generalSfw}": {
@@ -62,5 +53,33 @@
                 "👍 Follow server guidelines"
             ]
         }
-    }
+    },
+    "faq": [
+        {
+            "name": "Verification Info",
+            "description": "Explains the process of verification",
+            "text": [
+                "Hello, <@*{userId}>! Here's some info on the verification process...\n",
+                "1. Please allow 24 hours for our mods to verify your ticket (although usually it takes much less).",
+                "2. Remember! You need 2 photos to be verified (read the instructions in your ticket carefully).",
+                "3. After verification, your ticket is archived privately.",
+                "4. If you have other problems, just let us know here, and we'll get back to you.\n",
+                "Thanks for your patience :)"
+            ]
+        },
+        {
+            "name": "Invite a Friend",
+            "description": "Explains how to invite a friend to the server",
+            "text": ["Just send them a link to [dvnt.co/links](https://dvnt.co)! "]
+        },
+        {
+            "name": "Spoilers",
+            "description": "Explains how to spoiler an image on desktop and mobile",
+            "text": [
+                "[GIF in Rules channel[(<https://canary.discord.com/channels/1147406597287579648/1147438564938883134/1203080929975734272>)",
+                "On desktop, choose your image, then click the eye icon on the image above the chat bar.",
+                "On mobile, choose your image, tap it, then tap 'Mark as Spoiler'."
+            ]
+        }
+    ]
 }

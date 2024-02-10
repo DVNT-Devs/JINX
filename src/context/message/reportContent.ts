@@ -60,7 +60,7 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
                 .setCustomId("sendButton")
                 .setLabel("Send")
                 .setStyle(ButtonStyle.Success)
-                .setDisabled(!chosenRule && !suggestedChannel)
+                .setDisabled((chosenRule === undefined) && !(suggestedChannel))
         );
 
         await interaction.editReply({ embeds: [new EmbedBuilder()
@@ -110,11 +110,7 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
         )];
 
         await interaction.channel?.send({ content: embedText, components });
-        await interaction.editReply({ embeds: [new EmbedBuilder()
-            .setTitle("Report Content")
-            .setDescription("The message has been reported.")
-            .setColor(Colours.Success)
-        ], components: []});
+        await interaction.deleteReply();
         await interaction.targetMessage.delete();
     } else {
         await interaction.editReply({embeds: [new EmbedBuilder()

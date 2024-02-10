@@ -4,7 +4,8 @@
     "description": "Jinx by DVNT-Devs",
     "main": "index.js",
     "scripts": {
-        "build": "tsc",
+        "git-log": "git show --oneline -s --decorate=false > dist/commit.txt && git log -1 --pretty=format:'%an' >> dist/commit.txt",
+        "build": "tsc && pnpm git-log",
         "lint": "eslint src --fix",
         "dev": "rm -rf dist && pnpm lint && pnpm build && node --experimental-json-modules --enable-source-maps dist/index.js",
         "start": "node --experimental-json-modules --enable-source-maps -r dotenv/config dist/index.js",

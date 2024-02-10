@@ -11,6 +11,7 @@ interface RoleOption {
 
 interface Steps {
     name: string;
+    description?: string;
     text: string;
     roleOptions?: RoleOption[];
     maxRoles?: number
@@ -20,10 +21,12 @@ interface Steps {
 const steps: Steps[] = [
     {
         name: "Hello!",
-        text: "Welcome to DVNT!" // TODO
+        text: "Welcome to DVNT! Let's run through the roles the server has to offer.\n" +
+            "You don't have to pick any, but it'll help you find people with similar interests!",
     },
     {
         name: "Your Role",
+        description: "Are you a sub, dom, switch, or exploring?",
         text: "Which of the following roles best describes you? You can pick more than one!",
         roleOptions: [
             { name: "Dominant", roleId: data.roles.dom, emoji: "😈" },
@@ -34,6 +37,7 @@ const steps: Steps[] = [
     },
     {
         name: "DMs",
+        description: "Can people send you DMs? Or should they ask first?",
         text: "Would you like to receive DMs from other members?",
         roleOptions: [
             { name: "Anyone can message", roleId: data.roles.dms.open, emoji: "✅" },
@@ -44,6 +48,7 @@ const steps: Steps[] = [
     },
     {
         name: "Relationships",
+        description: "What kind of relationship are you looking for?",
         text: "What kind of relationship are you looking for? You can pick more than one!",
         roleOptions: [
             { name: "Play partner", roleId: data.roles.relationships.play, emoji: "🤙" },
@@ -53,6 +58,7 @@ const steps: Steps[] = [
     },
     {
         name: "Flirting",
+        description: "How do you feel about flirting?",
         text: "How do you feel about flirting?",
         roleOptions: [
             { name: "Fine by me!", roleId: data.roles.flirting.yes, emoji: "🥰" },
@@ -61,15 +67,28 @@ const steps: Steps[] = [
         maxRoles: 1
     },
     {
-        name: "Onboarding complete!",
-        text: "You're all set! Welcome to DVNT!"
+        name: "Events and Extras",
+        description: "Let us know about events you're interested in, and if you'd like to join our dev team",
+        text: "Select some roles for things you're interested in!",
+        roleOptions: [
+            { name: "Programmer / Developer", roleId: data.roles.developer, emoji: "💻" },
+            { name: "Game Nights", roleId: data.roles.events.game, emoji: "🎲" },
+        ],
     }
 ];
 
 const callback = async (interaction: CommandInteraction | ButtonInteraction, skipWelcome: boolean) => {
+    const memberList = await interaction.guild!.members.fetch();
     const localSteps = steps.map(x => x);
     if (skipWelcome) localSteps.shift();
+    const memberRoles = (interaction.member!.roles as GuildMemberRoleManager).cache.map(r => r.id);
+    // Find the first step where the user doesn't have any of the roles
+    // If they have roles in every one, go to the last step
+    // If they have none, go to the first step
     let step = 0;
+    const roleInStep = localSteps.map(step => step.roleOptions?.some(r => memberRoles.includes(r.roleId)));
+    step = roleInStep.indexOf(false);
+    if (step === -1) step = localSteps.length - 1;
     const m = await interaction.reply({ embeds: [new EmbedBuilder()
         .setTitle("One moment...")
         .setColor(0xF27878)
@@ -84,19 +103,36 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
             roleDropdown = new StringSelectMenuBuilder()
                 .setCustomId("roleDropdown")
                 .setPlaceholder("Select a role")
-                .setMinValues(1)
+                .setMinValues(0)
                 .setMaxValues(stepData.maxRoles || stepData.roleOptions.length);
             for (const roleOption of stepData.roleOptions) {
+                const hasRole = userRoleIDs.includes(roleOption.roleId);
+                const membersWithRole = memberList.filter(m => m.roles.cache.has(roleOption.roleId)).size;
                 const option = new StringSelectMenuOptionBuilder()
                     .setLabel(roleOption.name)
-                    .setValue(roleOption.roleId)
-                    .setDefault(userRoleIDs.includes(roleOption.roleId))
+                    .setValue(roleOption.roleId || "unset")
+                    .setDescription(hasRole ? `You and ${membersWithRole} others` : `${membersWithRole} members`)
+                    .setDefault(hasRole)
                     .setEmoji(parseEmoji(roleOption.emoji)! as APIMessageComponentEmoji);
                 if (roleOption.description) option
                     .setDescription(roleOption.description);
                 roleDropdown.addOptions(option);
             }
         }
+
+        const pageControls = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId("pagePicker")
+                .setPlaceholder("Choose a page")
+                .addOptions(localSteps.map((stepObject, index) => {
+                    const option = new StringSelectMenuOptionBuilder()
+                        .setValue(index.toString())
+                        .setLabel(stepObject.name)
+                        .setDefault(index === step);
+                    if (stepObject.description) option.setDescription(stepObject.description);
+                    return option;
+                }))
+        );
 
         const controls = [
             new ButtonBuilder()
@@ -117,15 +153,12 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
         ];
 
         const components = [];
+        components.push(pageControls);
         if (roleDropdown) components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(roleDropdown));
         components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(controls));
-        const rolesThisPage: string[] = roleDropdown ? stepData.roleOptions!.map(r => r.roleId) : [];
-        const current = userRoleIDs.filter(r => rolesThisPage.includes(r)).length;
-        const plural = current === 1 ? "" : "s";
-
         await interaction.editReply({ embeds: [new EmbedBuilder()
             .setTitle(stepData.name)
-            .setDescription((stepData.text || "") + "\n\n" + (roleDropdown ? `You have currently have ${current} role${plural}` : ""))
+            .setDescription(stepData.text || "")
             .setColor(0xF27878)
         ], components: components });
 
@@ -154,6 +187,9 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
 
             await (interaction.member!.roles as GuildMemberRoleManager).add(rolesToAdd);
             await (interaction.member!.roles as GuildMemberRoleManager).remove(rolesToRemove);
+        } else if (i.customId === "pagePicker") {
+            const select = i as StringSelectMenuInteraction;
+            step = parseInt(select.values[0]!);
         }
     }
 };

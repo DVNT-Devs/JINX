@@ -4,6 +4,7 @@ class JinxClient extends Client {
     commands: Record<string, (interaction: Interaction) => unknown> = {};
     onInteractionHook: (interaction: Interaction) => unknown = () => { };
     phishing: string[] = [];
+    purgeLock: boolean = false;
 
     constructor() {
         super({ intents: [
@@ -11,6 +12,7 @@ class JinxClient extends Client {
             GatewayIntentBits.GuildMembers,
             GatewayIntentBits.MessageContent,
             GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildModeration
         ] });
     }
 }

@@ -25,6 +25,12 @@ const callback = async (interaction: CommandInteraction) => {
     let target = interaction.guild!.members.cache.get(user.id) as GuildMember;
     let message = "";
 
+    // Check if the target is exempt from being insulted
+    if (data.exemptions.degrade.includes(target.id)) {
+        message = backfireResponse(target.id);
+        target = interaction.guild!.members.cache.get(interaction.user.id) as GuildMember;
+    }
+
     // If the user is a sub, have a chance of degrading themselves
     const userRoles = interaction.guild?.members.cache.get(interaction.user.id)?.roles.cache.map(role => role.id);
     if (userRoles?.some(role => data.roles.sub.includes(role))) {
