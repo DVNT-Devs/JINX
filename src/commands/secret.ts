@@ -28,9 +28,10 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
         );
         i = undefined as undefined | ModalSubmitInteraction;
         try {
-            i = await interaction.awaitModalSubmit({ filter: (i) =>
-                i.user.id === interaction.user.id,
-            time: 60000 }) as typeof i;
+            i = await interaction.awaitModalSubmit({
+                filter: (i) => i.user.id === interaction.user.id,
+                time: 60000 * 5
+            }) as typeof i;
         } catch (e) {
             return;
         }
@@ -70,9 +71,10 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     const m = await i.reply({...messageData, fetchReply: true, ephemeral: true});
     let button;
     try {
-        button = await m.awaitMessageComponent({ filter: (i) =>
-            i.user.id === interaction.user.id && m.id === i.message.id,
-        time: 60000 }) as ButtonInteraction;
+        button = await m.awaitMessageComponent({
+            filter: (i) => i.user.id === interaction.user.id && m.id === i.message.id,
+            time: 60000 * 5
+        }) as ButtonInteraction;
     } catch (e) {
         return;
     }

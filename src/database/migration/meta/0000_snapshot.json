@@ -1,5 +1,5 @@
 {
-  "id": "7fab4a93-0035-4852-8952-047694867050",
+  "id": "8612e2bd-49f8-4cd6-9a76-df7e63b3a55e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -8,6 +8,13 @@
       "name": "punishments",
       "schema": "",
       "columns": {
+        "punishment_id": {
+          "name": "punishment_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "sub_id": {
           "name": "sub_id",
           "type": "varchar",
@@ -65,7 +72,15 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "relationships_dom_id_sub_id_pk": {
+          "name": "relationships_dom_id_sub_id_pk",
+          "columns": [
+            "dom_id",
+            "sub_id"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     }
   },

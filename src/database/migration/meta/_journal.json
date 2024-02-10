@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1706466013797,
-      "tag": "0000_last_overlord",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1706718373801,
-      "tag": "0001_dry_plazm",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1706720384711,
-      "tag": "0002_goofy_hellion",
+      "when": 1707595288388,
+      "tag": "0000_goofy_true_believers",
       "breakpoints": true
     }
   ]

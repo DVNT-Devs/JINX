@@ -6,11 +6,9 @@ export const relationships = pgTable("relationships", {
     sub: varchar("sub_id").notNull(),
     accepted: boolean("accepted").notNull().default(false),
     accepted_timestamp: timestamp("created").notNull().defaultNow()
-}, (table) => {
-    return {
-        id: primaryKey({ columns: [table.dom, table.sub]})
-    };
-});
+}, (table) => ({
+    id: primaryKey({ columns: [table.dom, table.sub]})
+}));
 
 export const punishments = pgTable("punishments", {
     punishment_id: uuid("punishment_id").notNull().defaultRandom().primaryKey(),
