@@ -1,39 +1,56 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from "@discordjs/builders";
-import { ButtonStyle, CommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ButtonStyle, CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { Colours } from "../data";
 import DB from "../database/drizzle";
-import { punishments, relationships } from "../database/schema";
+import { challenges, punishments, relationships } from "../database/schema";
 import { eq, inArray, or } from "drizzle-orm";
-import invites from "../actions/discipline/invites";
+import relationshipsCallback from "../actions/discipline/relationships";
+import confirm from "../actions/discipline/confirm";
 
 const discipline = new SlashCommandBuilder()
     .setName("discipline")
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    // .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .setDescription("Give discipline to a member");
 
 
 export interface Data {
     domsAccepted: string[];
     subsAccepted: string[];
-    domsPending: number;
-    subsPending: number;
+    domsPending: string[];
+    subsPending: string[];
     punishedByOthers: typeof punishments.$inferSelect[];
     punishedByMe: typeof punishments.$inferSelect[];
 }
+export interface ModuleReturnData {
+    persist: boolean;
+    data: Data;
+}
+
+const resetAll = async (userId: string) => {
+    const db = await DB;
+    await db.delete(relationships).where(or(
+        eq(relationships.dom, userId),
+        eq(relationships.sub, userId)
+    ));
+    await db.delete(punishments).where(eq(punishments.sub, userId));
+    await db.delete(challenges).where(eq(challenges.sub, userId));
+};
 
 const callback = async (interaction: CommandInteraction) => {
     const db = await DB;
     await interaction.deferReply({ephemeral: true});
     const userId = interaction.user.id;
+    // In the background, fetch all the members of the guild
+    await interaction.guild?.members.fetch();
 
     let refresh = true;
     let breakOut = false;
 
-    const data: Data = {
+    let data: Data = {
         domsAccepted: [],
         subsAccepted: [],
-        domsPending: 0,
-        subsPending: 0,
+        domsPending: [],
+        subsPending: [],
         punishedByOthers: [],
         punishedByMe: []
     };
@@ -52,8 +69,8 @@ const callback = async (interaction: CommandInteraction) => {
 
             data.domsAccepted = doms.filter(row => row.accepted).map(row => row.dom);
             data.subsAccepted = subs.filter(row => row.accepted).map(row => row.sub);
-            data.domsPending = doms.length - data.domsAccepted.length;
-            data.subsPending = subs.length - data.subsAccepted.length;
+            data.domsPending = doms.filter(row => !row.accepted).map(row => row.dom);
+            data.subsPending = subs.filter(row => !row.accepted).map(row => row.sub);
 
             // Find any punishments where the user is the sub_id
             const punishmentsQuery = await db.select()
@@ -61,45 +78,58 @@ const callback = async (interaction: CommandInteraction) => {
                 .where(eq(punishments.sub, userId));
             data.punishedByOthers = punishmentsQuery;
             // And find any where the sub_id is in subsAccepted
-            data.punishedByMe = await db.select()
-                .from(punishments)
-                .where(inArray(punishments.sub, data.subsAccepted));
+            if (data.subsAccepted.length > 0) {
+                data.punishedByMe = await db.select()
+                    .from(punishments)
+                    .where(inArray(punishments.sub, data.subsAccepted));
+            }
             refresh = false;
         }
 
-        const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId("invites")
-                .setLabel("Invites")
-                .setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder()
-                .setCustomId("relationships")
-                .setLabel("Relationships")
-                .setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder()
-                .setCustomId("punishments")
-                .setLabel("Give Punishment")
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setCustomId("challenge")
-                .setLabel("Challenge")
-                .setStyle(ButtonStyle.Primary)
-        );
+        const buttons = [
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("relationships")
+                    .setLabel("Relationships")
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji({id: "1168736441749213205"}),
+                new ButtonBuilder()
+                    .setCustomId("punishments")
+                    .setLabel("Punishments")
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji({id: "1169338343851557045"}),
+                new ButtonBuilder()
+                    .setCustomId("challenge")
+                    .setLabel("Challenges")
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji({id: "1168736435147395252"}),
+                new ButtonBuilder()
+                    .setCustomId("killSwitch")
+                    .setLabel("Opt-out")
+                    .setStyle(ButtonStyle.Danger)
+                    .setDisabled(
+                        data.domsAccepted.length === 0 && data.subsAccepted.length === 0 &&
+                        data.domsPending.length === 0 && data.subsPending.length === 0
+                    )
+                    .setEmoji({id: "947441948543815720"})
+            )
+        ];
 
         await interaction.editReply({embeds: [new EmbedBuilder()
             .setTitle("Discipline")
             .setDescription(
                 `Welcome, @${interaction.user.username}!\n\n` +
-                `You have ${data.domsAccepted.length} doms (${data.domsPending} pending) and ` +
-                `${data.subsAccepted.length} subs (${data.subsPending} pending)`
+                "This page is not meant to be seen, don't tell me it looks bad\n\n" +
+                `You have ${data.domsAccepted.length} doms (${data.domsPending.length} invited) and ` +
+                `${data.subsAccepted.length} subs (${data.subsPending.length} requests)`
             )
             .setColor(Colours.Danger)
-        ], components: [buttons]});
+        ], components: buttons});
 
         let i;
         try {
             i = await interaction.channel?.awaitMessageComponent({
-                filter: (i) => i.user.id === interaction.user.id,
+                filter: (i) => i.user.id === interaction.user.id && i.message.interaction?.id === interaction.id,
                 time: 60000 * 5
             });
         } catch (e) {
@@ -113,11 +143,24 @@ const callback = async (interaction: CommandInteraction) => {
         await i.deferUpdate();
         const customId = i.customId;
         switch (customId) {
-        case "invites": {
-            if(! await invites(interaction, data)) break;
-            break;
-        }}
-    } while (breakOut);
+            case "killSwitch": {
+                if (await confirm(
+                    interaction,
+                    "Opt-out of discipline",
+                    "This will clear all punishments and challenges set for you.\n" +
+                    "It also clears any doms / subs you have accepted / pending / invited.\n\n" +
+                    "**Are you sure you want to reset everything?**"
+                )) await resetAll(interaction.user.id);
+                refresh = true;
+                break;
+            } case "relationships": {
+                const out = await relationshipsCallback(interaction, data);
+                data = out.data;
+                breakOut = out.persist;
+                break;
+            }
+        }
+    } while (!breakOut);
     await interaction.editReply({embeds: [new EmbedBuilder()
         .setTitle("Discipline")
         .setDescription("Command timed out | Run /discipline to use the command again")

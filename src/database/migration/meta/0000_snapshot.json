@@ -1,9 +1,50 @@
 {
-  "id": "8612e2bd-49f8-4cd6-9a76-df7e63b3a55e",
+  "id": "89c72eb0-5908-45a6-aa0b-4666919f351d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
+    "challenges": {
+      "name": "challenges",
+      "schema": "",
+      "columns": {
+        "challenge_id": {
+          "name": "challenge_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "sub_id": {
+          "name": "sub_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_by": {
+          "name": "set_by",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "challenge": {
+          "name": "challenge",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "punishments": {
       "name": "punishments",
       "schema": "",
@@ -17,6 +58,12 @@
         },
         "sub_id": {
           "name": "sub_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_by": {
+          "name": "set_by",
           "type": "varchar",
           "primaryKey": false,
           "notNull": true

@@ -26,7 +26,7 @@
         "jest"
     ],
     "rules": {
-        "indent": [ "error", 4 ],
+        "indent": [ "error", 4, { "SwitchCase": 1} ],
         "linebreak-style": [ "error", "unix" ],
         "quotes": [ "warn", "double" ],
         "semi": [ "error", "always" ],

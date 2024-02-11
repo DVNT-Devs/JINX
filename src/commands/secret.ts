@@ -29,7 +29,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
         i = undefined as undefined | ModalSubmitInteraction;
         try {
             i = await interaction.awaitModalSubmit({
-                filter: (i) => i.user.id === interaction.user.id,
+                filter: (i) => i.user.id === interaction.user.id && i instanceof ModalSubmitInteraction,
                 time: 60000 * 5
             }) as typeof i;
         } catch (e) {
@@ -42,7 +42,6 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
         i = interaction;
     }
     const inSecretsChannel = interaction.channelId === rules.channels.secrets;
-    console.log(interaction.channelId, inSecretsChannel, rules.channels.secrets);
     const inConfessionsCategory = interaction.channel?.isThread() && interaction.channel.parentId === rules.channels.confessions;
     if (!inSecretsChannel && !inConfessionsCategory) {
         await i.reply({ embeds: [new EmbedBuilder()
