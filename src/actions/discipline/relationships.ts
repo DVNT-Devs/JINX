@@ -1,14 +1,12 @@
 import { ButtonStyle, CommandInteraction } from "discord.js";
-import { Data, Data as DisciplineData, ModuleReturnData } from "../../commands/discipline";
+import { Data as DisciplineData, ModuleReturnData, plural } from "../../commands/discipline";
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, UserSelectMenuBuilder } from "@discordjs/builders";
 import { Colours } from "../../data";
 import DB from "../../database/drizzle";
 import { relationships } from "../../database/schema";
 import { and, eq } from "drizzle-orm";
-import confirm from "./confirm";
 
 
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const userList = (list: string[]) => list.map((u) => `<@${u}>`).join(", ");
 
 export default async function (interaction: CommandInteraction, data: DisciplineData): Promise<ModuleReturnData> {
@@ -178,13 +176,11 @@ export default async function (interaction: CommandInteraction, data: Discipline
         const customId = i.customId;
         lastClicked = customId;
         switch (customId) {
-            case "back": {
-                return {persist: false, data: data};
-            }
+            case "back": { return {persist: false, data: data}; }
         }
         // If the customId is inviteDomSU, removeDomSS, cancelInviteSS, or removeSubSS, it's much easier
         if (i.isStringSelectMenu() || i.isUserSelectMenu()) {
-            let dataOut: Data | undefined, messageOut;
+            let dataOut: DisciplineData | undefined, messageOut;
             for (const member of i.values) {
                 switch (customId) {
                     case "inviteDomSU": {

@@ -6,6 +6,11 @@ import { challenges, punishments, relationships } from "../database/schema";
 import { eq, inArray, or } from "drizzle-orm";
 import relationshipsCallback from "../actions/discipline/relationships";
 import confirm from "../actions/discipline/confirm";
+import punishment from "../actions/discipline/punishment";
+
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+export { plural };
 
 const discipline = new SlashCommandBuilder()
     .setName("discipline")
@@ -34,6 +39,12 @@ const resetAll = async (userId: string) => {
     ));
     await db.delete(punishments).where(eq(punishments.sub, userId));
     await db.delete(challenges).where(eq(challenges.sub, userId));
+};
+
+const notifications = {
+    sub: "<:sub:1200811326973431950>",
+    dom: "<:dom:1200811331209666600>",
+    switch: "<:switch:1200811328735031426>",
 };
 
 const callback = async (interaction: CommandInteraction) => {
@@ -97,12 +108,14 @@ const callback = async (interaction: CommandInteraction) => {
                     .setCustomId("punishments")
                     .setLabel("Punishments")
                     .setStyle(ButtonStyle.Secondary)
-                    .setEmoji({id: "1169338343851557045"}),
+                    .setEmoji({id: "1169338343851557045"})
+                    .setDisabled(data.punishedByOthers.length === 0 && data.punishedByMe.length === 0),
                 new ButtonBuilder()
                     .setCustomId("challenge")
                     .setLabel("Challenges")
                     .setStyle(ButtonStyle.Secondary)
-                    .setEmoji({id: "1168736435147395252"}),
+                    .setEmoji({id: "1168736435147395252"})
+                    .setDisabled(data.punishedByOthers.length === 0 && data.punishedByMe.length === 0),
                 new ButtonBuilder()
                     .setCustomId("killSwitch")
                     .setLabel("Opt-out")
@@ -115,13 +128,20 @@ const callback = async (interaction: CommandInteraction) => {
             )
         ];
 
+        // Check if the user has incoming invites
+        let invites = "";
+        if (data.domsPending.length > 0) {
+            invites += `\n\n${notifications.dom} You have ${plural(data.domsPending.length, "outgoing request")} to doms`;
+        }
+        if (data.subsPending.length > 0) {
+            invites += `\n\n${notifications.sub} You have ${plural(data.subsPending.length, "incoming request")} from subs`;
+        }
+
         await interaction.editReply({embeds: [new EmbedBuilder()
             .setTitle("Discipline")
             .setDescription(
-                `Welcome, @${interaction.user.username}!\n\n` +
-                "This page is not meant to be seen, don't tell me it looks bad\n\n" +
-                `You have ${data.domsAccepted.length} doms (${data.domsPending.length} invited) and ` +
-                `${data.subsAccepted.length} subs (${data.subsPending.length} requests)`
+                `Welcome, <@${userId}>! Here you can manage your relationships, punishments, and challenges for your doms or subs.` +
+                invites
             )
             .setColor(Colours.Danger)
         ], components: buttons});
@@ -155,6 +175,11 @@ const callback = async (interaction: CommandInteraction) => {
                 break;
             } case "relationships": {
                 const out = await relationshipsCallback(interaction, data);
+                data = out.data;
+                breakOut = out.persist;
+                break;
+            } case "punishments": {
+                const out = await punishment(interaction, data);
                 data = out.data;
                 breakOut = out.persist;
                 break;
