@@ -5,6 +5,7 @@ import { Colours } from "../../data";
 import DB from "../../database/drizzle";
 import { relationships } from "../../database/schema";
 import { and, eq } from "drizzle-orm";
+import confirm from "./confirm";
 
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
@@ -39,6 +40,7 @@ export default async function (interaction: CommandInteraction, data: Discipline
                             .setValue(m)
                         ) || {label: "No doms", value: "none"})
                         .setDisabled(!data.domsAccepted.length)
+                        .setMaxValues(data.domsAccepted.length)
                 ));
                 break;
             } case "removeSub": {
@@ -52,6 +54,7 @@ export default async function (interaction: CommandInteraction, data: Discipline
                             .setValue(m)
                         ) || {label: "No subs", value: "none"})
                         .setDisabled(!data.subsAccepted.length)
+                        .setMaxValues(data.subsAccepted.length)
                 ));
                 break;
             } case "cancelInvite": {
@@ -65,6 +68,7 @@ export default async function (interaction: CommandInteraction, data: Discipline
                             .setValue(m)
                         ) || {label: "No pending invites", value: "none"})
                         .setDisabled(!data.domsPending.length)
+                        .setMaxValues(data.domsPending.length)
                 ));
                 break;
             } case "acceptSub": {
@@ -77,6 +81,7 @@ export default async function (interaction: CommandInteraction, data: Discipline
                             .setDescription(usernameOf(m))
                             .setValue(m)
                         ) || {label: "No pending invites", value: "none"})
+                        .setMaxValues(data.subsPending.length)
                 ));
                 break;
             } case "rejectSub": {
@@ -89,6 +94,7 @@ export default async function (interaction: CommandInteraction, data: Discipline
                             .setDescription(usernameOf(m))
                             .setValue(m)
                         ) || {label: "No pending invites", value: "none"})
+                        .setMaxValues(data.subsPending.length)
                 ));
                 break;
             }
@@ -179,35 +185,37 @@ export default async function (interaction: CommandInteraction, data: Discipline
         // If the customId is inviteDomSU, removeDomSS, cancelInviteSS, or removeSubSS, it's much easier
         if (i.isStringSelectMenu() || i.isUserSelectMenu()) {
             let dataOut: Data | undefined, messageOut;
-            switch (customId) {
-                case "inviteDomSU": {
-                    // Send an invite to the selected user
-                    [dataOut, messageOut] = await sendInviteToDom(i.values[0]!, interaction.user.id, data);
-                    break;
-                } case "removeDomSS": {
-                    // Removes a dom from the user's list
-                    [dataOut, messageOut] = await removeDomOrCancelInvite(i.values[0]!, interaction.user.id, data);
-                    break;
-                } case "removeSubSS": {
-                    // Removes a sub from the user's list
-                    [dataOut, messageOut] = await removeSubOrRejectInvite(i.values[0]!, interaction.user.id, data);
-                    break;
-                } case "cancelInviteSS": {
-                    // Cancels an invite sent to a dom by the user
-                    [dataOut, messageOut] = await removeDomOrCancelInvite(i.values[0]!, interaction.user.id, data);
-                    break;
-                } case "acceptSubSS": {
-                    // Accepts a sub's request to be the user's sub
-                    [dataOut, messageOut] = await acceptSub(i.values[0]!, interaction.user.id, data);
-                    break;
-                } case "rejectSubSS": {
-                    // Rejects a sub's request to be the user's sub
-                    [dataOut, messageOut] = await removeSubOrRejectInvite(i.values[0]!, interaction.user.id, data);
-                    break;
+            for (const member of i.values) {
+                switch (customId) {
+                    case "inviteDomSU": {
+                        // Send an invite to the selected user
+                        [dataOut, messageOut] = await sendInviteToDom(member, interaction.user.id, data);
+                        break;
+                    } case "removeDomSS": {
+                        // Removes a dom from the user's list
+                        [dataOut, messageOut] = await removeDomOrCancelInvite(member, interaction.user.id, data);
+                        break;
+                    } case "removeSubSS": {
+                        // Removes a sub from the user's list
+                        [dataOut, messageOut] = await removeSubOrRejectInvite(member, interaction.user.id, data);
+                        break;
+                    } case "cancelInviteSS": {
+                        // Cancels an invite sent to a dom by the user
+                        [dataOut, messageOut] = await removeDomOrCancelInvite(member, interaction.user.id, data);
+                        break;
+                    } case "acceptSubSS": {
+                        // Accepts a sub's request to be the user's sub
+                        [dataOut, messageOut] = await acceptSub(member, interaction.user.id, data);
+                        break;
+                    } case "rejectSubSS": {
+                        // Rejects a sub's request to be the user's sub
+                        [dataOut, messageOut] = await removeSubOrRejectInvite(member, interaction.user.id, data);
+                        break;
+                    }
                 }
+                data = dataOut!;
+                message = messageOut!;
             }
-            data = dataOut!;
-            message = messageOut!;
         }
     } while (!breakOut);
     return {persist: true, data: data};
@@ -225,7 +233,7 @@ async function sendInviteToDom(dom: string, sub: string, data: DisciplineData): 
     // Add to the list
     data.domsPending.push(dom);
 
-    return [data, "Member was invited to be your dom"];
+    return [data, "Member was invited to be your dom - You'll need to ask them to accept the invite"];
 }
 
 async function removeDomOrCancelInvite(dom: string, sub: string, data: DisciplineData): Promise<[DisciplineData, string]> {
