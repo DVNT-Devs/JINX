@@ -47,11 +47,11 @@ const checkAttachments = async (message: Message) => {
     const rules = contentRestrictions.reports[message.channel.id as keyof typeof contentRestrictions.reports] as {enforceSpoilers?: boolean};
     // And if they don't care about spoilers, we don't need to do anything
     if (!rules.enforceSpoilers) return;
-    // Only allow images and videos
+    // Only check images and videos
     const isAllowedType = (type: string) => type.startsWith("image") || type.startsWith("video");
-    if (!message.attachments.every(a => isAllowedType(a.contentType!))) return;
+    const attachments = message.attachments.filter(a => isAllowedType(a.contentType || ""));
     // If every attachment is allowed, we don't need to do anything
-    if (message.attachments.every(a => a.name.startsWith("SPOILER_"))) return;
+    if (attachments.every(a => a.name.startsWith("SPOILER_"))) return;
 
     // Delete the message
     await reportContent(message, 0, undefined, undefined, true);
