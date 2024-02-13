@@ -109,13 +109,13 @@ const callback = async (interaction: CommandInteraction) => {
                     .setLabel("Punishments")
                     .setStyle(ButtonStyle.Secondary)
                     .setEmoji({id: "1169338343851557045"})
-                    .setDisabled(data.punishedByOthers.length === 0 && data.punishedByMe.length === 0),
+                    .setDisabled(data.domsAccepted.length === 0 && data.subsAccepted.length === 0),
                 new ButtonBuilder()
                     .setCustomId("challenge")
                     .setLabel("Challenges")
                     .setStyle(ButtonStyle.Secondary)
                     .setEmoji({id: "1168736435147395252"})
-                    .setDisabled(data.punishedByOthers.length === 0 && data.punishedByMe.length === 0),
+                    .setDisabled(data.domsAccepted.length === 0 && data.subsAccepted.length === 0),
                 new ButtonBuilder()
                     .setCustomId("killSwitch")
                     .setLabel("Opt-out")
@@ -144,7 +144,7 @@ const callback = async (interaction: CommandInteraction) => {
                 invites
             )
             .setColor(Colours.Danger)
-        ], components: buttons});
+        ], components: buttons });
 
         let i;
         try {
