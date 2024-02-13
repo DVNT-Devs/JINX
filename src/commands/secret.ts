@@ -11,47 +11,77 @@ const praise = new SlashCommandBuilder()
 
 
 const callback = async (interaction: CommandInteraction | ButtonInteraction) => {
-    let secret;
-    let i;
-    if (interaction.isButton()) {
-        await interaction.showModal(new ModalBuilder()
-            .setCustomId("text")
-            .setTitle("Share a Secret")
-            .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
-                .setCustomId("secret")
-                .setLabel("Share a secret")
-                .setMaxLength(2000)
-                .setStyle(TextInputStyle.Short)
-                .setRequired(false)
-                .setPlaceholder("Pressing submit will NOT send a message")
-            ))
-        );
-        i = undefined as undefined | ModalSubmitInteraction;
-        try {
-            i = await interaction.awaitModalSubmit({ filter: (i) =>
-                i.user.id === interaction.user.id,
-            time: 60000 }) as typeof i;
-        } catch (e) {
-            return;
-        }
-        if (!i) return;
-        secret = i.components[0]?.components[0]?.value;
-    } else {
-        secret = interaction.options.get("secret")!.value as string;
-        i = interaction;
-    }
+    const { i, secret } = await interactionReply(interaction) || {i: undefined};
+    if (!i || !secret) return;
+
     const inSecretsChannel = interaction.channelId === rules.channels.secrets;
-    console.log(interaction.channelId, inSecretsChannel, rules.channels.secrets);
     const inConfessionsCategory = interaction.channel?.isThread() && interaction.channel.parentId === rules.channels.confessions;
+
     if (!inSecretsChannel && !inConfessionsCategory) {
-        await i.reply({ embeds: [new EmbedBuilder()
-            .setTitle("Wrong Channel")
-            .setDescription(`Please use this command in <#${rules.channels.secrets}> or <#${rules.channels.confessions}>.`)
-            .setColor(Colours.Danger)
+        return await i.reply({embeds: [
+            new EmbedBuilder()
+                .setTitle("Wrong Channel")
+                .setDescription(`Please use this command in <#${rules.channels.secrets}> or <#${rules.channels.confessions}>.`)
+                .setColor(Colours.Danger)
         ], ephemeral: true});
+    }
+
+    const prompt = inSecretsChannel ? "Secret" : "Confession";
+
+    const agreed = await agreedToSecret(i, prompt, secret);
+    if (agreed === undefined) return;
+    if (!agreed) return await i.deleteReply();
+
+    const channel = interaction.channel as GuildTextBasedChannel;
+    const message = await channel.send(`*Anonymous said*: "${secret}"`);
+    void logSecret(channel.id, message.id, interaction.user.id);
+    await i.deleteReply();
+
+    if (inConfessionsCategory) return;
+
+    // Purge any messages from the bot with components
+    const messages = await interaction.channel!.messages.fetch({ limit: 10 });
+    await channel.bulkDelete(messages.filter(m => m.author.id === interaction.client.user!.id && m.components.length > 0));
+    // Then send a new message with a button
+    await interaction.channel!.send({ components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId("global:secret").setLabel("Share a Secret").setStyle(ButtonStyle.Danger)
+    )] });
+};
+
+const interactionReply = async (interaction: CommandInteraction | ButtonInteraction) => {
+    // If they used a slash command, just use the data from it
+    if (interaction.isCommand()) return { i: interaction, secret: interaction.options.get("secret")!.value as string };
+    // Otherwise, ask in a modal
+    await interaction.showModal(new ModalBuilder()
+        .setCustomId("text")
+        .setTitle("Share a Secret")
+        .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
+            .setCustomId("secret")
+            .setLabel("Share a secret")
+            .setMaxLength(2000)
+            .setStyle(TextInputStyle.Short)
+            .setRequired(false)
+            .setPlaceholder("Pressing submit will NOT send a message")
+        ))
+    );
+    // Define an interaction
+    let i = undefined as undefined | ModalSubmitInteraction;
+    try {
+        i = await interaction.awaitModalSubmit({ filter: (i) =>
+            i.user.id === interaction.user.id,  // Do a message check here
+        time: 60000 }) as typeof i;
+    } catch (e) {
         return;
     }
-    const prompt = inSecretsChannel ? "Secret" : "Confession";
+    if (!i) return;
+    return {i, secret: i.components[0]?.components[0]?.value};
+};
+
+const agreedToSecret = async (
+    interaction: CommandInteraction | ModalSubmitInteraction,
+    prompt: string,
+    secret: string
+): Promise<boolean | undefined> => {
     const messageData = { embeds: [new EmbedBuilder()
         .setTitle(prompt)
         .setDescription(
@@ -67,36 +97,20 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     ], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder().setCustomId("agree").setLabel("Agree and Send").setStyle(ButtonStyle.Danger)
     )]};
-    const m = await i.reply({...messageData, fetchReply: true, ephemeral: true});
+    // Send to the channel
+    const m = await interaction.reply({...messageData, fetchReply: true, ephemeral: true});
+    // Wait for the user to press a button
     let button;
     try {
         button = await m.awaitMessageComponent({ filter: (i) =>
-            i.user.id === interaction.user.id && m.id === i.message.id,
+            i.user.id === interaction.user.id && i.message.id === i.id,
         time: 60000 }) as ButtonInteraction;
-    } catch (e) {
-        return;
-    }
-    if (!i) return;
-    void button.deferUpdate();
-    if (button.customId !== "agree") return;
-
-    const channel = interaction.channel as GuildTextBasedChannel;
-    const message = await channel.send(`*Anonymous said*: "${secret}"`);
-    void logSecret(channel.id, message.id, interaction.user.id);
-    await i.deleteReply();
-
-    if (inConfessionsCategory) return;
-
-    // Purge any messages from the bot with components
-    const messages = await interaction.channel!.messages.fetch({ limit: 10 });
-    const bulkDeleteChannel = interaction.channel! as GuildTextBasedChannel;
-    await bulkDeleteChannel.bulkDelete(messages.filter(m => m.author.id === interaction.client.user!.id && m.components.length > 0));
-    // Then send a new message with a button
-    await interaction.channel!.send({ components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId("global:secret").setLabel("Share a Secret").setStyle(ButtonStyle.Danger)
-    )] });
+    } catch (e) { return; }
+    await button.deferUpdate();
+    // If they agreed, return true, otherwise return false
+    // Undefined is used as a null response
+    return button.customId === "agree";
 };
-
 
 export {
     praise as command,
