@@ -11,24 +11,27 @@
         "secrets": "1199018123127427082",
         "banLogs": "1162409007835775151"
     },
+    "messages": {
+        "spoiler": "😶‍🌫️ All content must be spoiled"
+    },
     "reports": {
         "${channels.lewd}": {
             "guidelines": "https://discord.com/channels/1147406597287579648/1163488474922500146/1163589452069867602",
             "rules": [
                 "✅ Breast & butt nudity is ok",
                 "🚫 No genital nudity or sex acts",
-                "😶‍🌫️ All content needs to be spoiled",
                 "💬 Reply to content in [Lewd Comments](<https://discord.com/channels/${guild}/${channels.lewdComments}>)"
-            ]
+            ],
+            "enforceSpoilers": true
         },
         "${channels.kinkyPics}": {
             "guidelines": "https://discord.com/channels/1147406597287579648/1163488341862396075/1163598071784034346",
             "rules": [
                 "⛓️ Must have a distinguishable kink",
-                "😶‍🌫️ NSFW content must be spoiled",
                 "❗ Include disclaimer (i.e. 'Blood')",
                 "💬 Reply to content in <#${channels.kinkyComments}>"
-            ]
+            ],
+            "enforceSpoilers": true
         },
         "${channels.generalSfw}": {
             "guidelines": "https://discord.com/channels/1147406597287579648/1149162524042858536/1149162524042858538",
