@@ -158,7 +158,7 @@ const hideMessage = async (interaction: ButtonInteraction) => {
     const expected = `@${interaction.user.id}`;
     if (customIdParameters[1] !== expected) {
         await interaction.reply({
-            content: `This message is not for you - Only <${expected}> can hide this message.`,
+            content: `This message is not for you - Only <${customIdParameters[1]}> can hide this message.`,
             ephemeral: true
         });
         return;
