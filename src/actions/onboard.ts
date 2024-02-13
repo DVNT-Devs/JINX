@@ -1,5 +1,5 @@
 import { ButtonBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "@discordjs/builders";
-import { APIMessageComponentEmoji, ActionRowBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, GuildMemberRoleManager, StringSelectMenuInteraction, parseEmoji } from "discord.js";
+import { APIMessageComponentEmoji, ActionRowBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, GuildMember, GuildMemberRoleManager, StringSelectMenuInteraction, parseEmoji } from "discord.js";
 import data from "../data";
 
 interface RoleOption {
@@ -78,7 +78,7 @@ const steps: Steps[] = [
 ];
 
 const callback = async (interaction: CommandInteraction | ButtonInteraction, skipWelcome: boolean) => {
-    const memberList = await interaction.guild!.members.fetch();
+    const memberList = (await interaction.guild!.members.fetch()).map(m => m) as GuildMember[];
     const localSteps = steps.map(x => x);
     if (skipWelcome) localSteps.shift();
     const memberRoles = (interaction.member!.roles as GuildMemberRoleManager).cache.map(r => r.id);
@@ -98,27 +98,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
         const userRoleIDs = (interaction.member!.roles as GuildMemberRoleManager).cache.map(r => r.id);
         const stepData = localSteps[step]!;
 
-        let roleDropdown = undefined;
-        if (stepData.roleOptions) {
-            roleDropdown = new StringSelectMenuBuilder()
-                .setCustomId("roleDropdown")
-                .setPlaceholder("Select a role")
-                .setMinValues(0)
-                .setMaxValues(stepData.maxRoles || stepData.roleOptions.length);
-            for (const roleOption of stepData.roleOptions) {
-                const hasRole = userRoleIDs.includes(roleOption.roleId);
-                const membersWithRole = memberList.filter(m => m.roles.cache.has(roleOption.roleId)).size;
-                const option = new StringSelectMenuOptionBuilder()
-                    .setLabel(roleOption.name)
-                    .setValue(roleOption.roleId || "unset")
-                    .setDescription(hasRole ? `You and ${membersWithRole} others` : `${membersWithRole} members`)
-                    .setDefault(hasRole)
-                    .setEmoji(parseEmoji(roleOption.emoji)! as APIMessageComponentEmoji);
-                if (roleOption.description) option
-                    .setDescription(roleOption.description);
-                roleDropdown.addOptions(option);
-            }
-        }
+        const roleDropdown = generateRoleDropdown(stepData, userRoleIDs, memberList);
 
         const pageControls = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
             new StringSelectMenuBuilder()
@@ -156,6 +136,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
         components.push(pageControls);
         if (roleDropdown) components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(roleDropdown));
         components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(controls));
+
         await interaction.editReply({ embeds: [new EmbedBuilder()
             .setTitle(stepData.name)
             .setDescription(stepData.text || "")
@@ -172,26 +153,57 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction, ski
             break;
         }
         await i.deferUpdate();
-        if (i.customId === "back") {
-            step = Math.max(0, step - 1);
-        } else if (i.customId === "next") {
-            step = Math.min(localSteps.length - 1, step + 1);
-        } else if (i.customId === "roleDropdown") {
-            const select = i as StringSelectMenuInteraction;
-            // Add every role they selected if they don't already have it
-            const rolesToAdd = select.values.filter(v => !userRoleIDs.includes(v));
-            // Then remove every role they didn't select if they have it
-            const rolesToRemove = stepData.roleOptions!
-                .map(r => r.roleId)
-                .filter(r => !select.values.includes(r) && userRoleIDs.includes(r));
 
-            await (interaction.member!.roles as GuildMemberRoleManager).add(rolesToAdd);
-            await (interaction.member!.roles as GuildMemberRoleManager).remove(rolesToRemove);
-        } else if (i.customId === "pagePicker") {
-            const select = i as StringSelectMenuInteraction;
-            step = parseInt(select.values[0]!);
+        switch (i.customId) {
+            case "back": {
+                step = Math.max(0, step - 1);
+                break;
+            } case "next": {
+                step = Math.min(localSteps.length - 1, step + 1);
+                break;
+            } case "roleDropdown": {
+                const select = i as StringSelectMenuInteraction;
+                // Add every role they selected if they don't already have it
+                const rolesToAdd = select.values.filter(v => !userRoleIDs.includes(v));
+                // Then remove every role they didn't select if they have it
+                const rolesToRemove = stepData.roleOptions!
+                    .map(r => r.roleId)
+                    .filter(r => !select.values.includes(r) && userRoleIDs.includes(r));
+
+                await (interaction.member!.roles as GuildMemberRoleManager).add(rolesToAdd);
+                await (interaction.member!.roles as GuildMemberRoleManager).remove(rolesToRemove);
+                break;
+            } case "pagePicker": {
+                const select = i as StringSelectMenuInteraction;
+                step = parseInt(select.values[0]!);
+                break;
+            }
         }
     }
 };
+
+const generateRoleDropdown = (step: Steps, userIDs: string[], members: GuildMember[]) => {
+    if (!step.roleOptions) return;
+    const roleDropdown = new StringSelectMenuBuilder()
+        .setCustomId("roleDropdown")
+        .setPlaceholder("Select a role")
+        .setMinValues(0)
+        .setMaxValues(step.maxRoles || step.roleOptions.length);
+    for (const roleOption of step.roleOptions) {
+        const hasRole = userIDs.includes(roleOption.roleId);
+        const membersWithRole = members.filter(m => m.roles.cache.has(roleOption.roleId)).length;
+        const option = new StringSelectMenuOptionBuilder()
+            .setLabel(roleOption.name)
+            .setValue(roleOption.roleId || "unset")
+            .setDescription(hasRole ? `You and ${membersWithRole} others` : `${membersWithRole} members`)
+            .setDefault(hasRole)
+            .setEmoji(parseEmoji(roleOption.emoji)! as APIMessageComponentEmoji);
+        if (roleOption.description) option
+            .setDescription(roleOption.description);
+        roleDropdown.addOptions(option);
+    }
+    return roleDropdown;
+};
+
 
 export default callback;
