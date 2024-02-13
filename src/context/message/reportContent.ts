@@ -1,4 +1,4 @@
-import { ButtonInteraction, ButtonStyle, ChannelSelectMenuInteraction, ChannelType, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, PermissionFlagsBits, StringSelectMenuInteraction } from "discord.js";
+import { ButtonInteraction, ButtonStyle, ChannelSelectMenuInteraction, ChannelType, ContextMenuCommandBuilder, Message, MessageContextMenuCommandInteraction, PermissionFlagsBits, StringSelectMenuInteraction } from "discord.js";
 import { contentRestrictions, Colours } from "../../data";
 import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "@discordjs/builders";
 
@@ -25,10 +25,7 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
         ] });
         return;
     }
-    const channelId = channel.id as keyof typeof contentRestrictions.reports;
-    const restrictions = contentRestrictions.reports[channelId] as { guidelines?: string, rules: string[] };
-    const ruleList = restrictions.rules.map(x => x);
-    if (restrictions.guidelines) ruleList.push(guidelines(restrictions.guidelines));
+    const ruleList = generateRuleList(channel.id);
 
     let readyToSend = false;
     let breakOut = false;
@@ -95,23 +92,8 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
         }
     }
     if (readyToSend) {
-        const preamble = `Hey there <@${interaction.targetMessage.author.id}>!\n` +
-            "Your post was removed for not following this channel's guidelines.";
-        const ruleBroken = chosenRule ? (
-            `Your post was marked for breaking rule ${chosenRule + 1}: ${ruleList[chosenRule]}.`
-        ) : "";
-        const suggestedChannelText = suggestedChannel ? `This content would fit in better in <#${suggestedChannel}>.` : "";
-        const embedText = [preamble, ruleBroken, suggestedChannelText].filter((x) => x !== "").join("\n");
-        const components: ActionRowBuilder<ButtonBuilder>[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId("global:rules")
-                .setLabel("View rules")
-                .setStyle(ButtonStyle.Danger)
-        )];
-
-        await interaction.channel?.send({ content: embedText, components });
+        await reportContent(interaction.targetMessage, chosenRule, suggestedChannel);
         await interaction.deleteReply();
-        await interaction.targetMessage.delete();
     } else {
         await interaction.editReply({embeds: [new EmbedBuilder()
             .setTitle("Report Content")
@@ -121,12 +103,48 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
     }
 };
 
-const rulesInChannel = async (interaction: ButtonInteraction) => {
-    // This triggers when someone presses the "View rules" button (global:rules)
-    const channelId = interaction.channel!.id as keyof typeof contentRestrictions.reports;
-    const restrictions = contentRestrictions.reports[channelId] as { guidelines?: string, rules: string[] };
+const reportContent = async (
+    message: Message,
+    chosenRule: number | undefined,
+    suggestedChannel: string | undefined,
+    ruleList: string[] = generateRuleList(message.channel!.id),
+    automated: boolean = false
+) => {
+    const preamble = `Hey there <@${message.author.id}>!\n` +
+        "Your post was removed for not following this channel's guidelines.";
+    const ruleBroken = chosenRule !== undefined ? (
+        `Your post was flagged for breaking Rule ${chosenRule + 1}: ${ruleList[chosenRule]}.`
+    ) : "";
+    const suggestedChannelText = suggestedChannel ? `This content would fit in better in <#${suggestedChannel}>.` : "";
+    const automatedText = automated ? "*This action was done automatically - Please contact a moderator if this was a mistake.*" : "";
+    const embedText = [preamble, ruleBroken, suggestedChannelText, automatedText].filter((x) => x !== "").join("\n");
+    const components: ActionRowBuilder<ButtonBuilder>[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setCustomId("global:rules")
+            .setLabel("View rules")
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(`global:hide?@${message.author.id}`)
+            .setLabel("Hide this message")
+            .setStyle(ButtonStyle.Secondary)
+    )];
+
+    await message.channel?.send({ content: embedText, components });
+    await message.delete();
+};
+
+const generateRuleList = (channel: string): string[] => {
+    const channelId = channel as keyof typeof contentRestrictions.reports;
+    const restrictions = contentRestrictions.reports[channelId] as { guidelines?: string, rules: string[], enforceSpoilers?: boolean};
     const ruleList = restrictions.rules.map(x => x);
     if (restrictions.guidelines) ruleList.push(guidelines(restrictions.guidelines));
+    if (restrictions.enforceSpoilers) ruleList.unshift(contentRestrictions.messages.spoiler);
+    return ruleList;
+};
+
+const rulesInChannel = async (interaction: ButtonInteraction) => {
+    // This triggers when someone presses the "View rules" button (global:rules)
+    const ruleList = generateRuleList(interaction.channel!.id);
 
     await interaction.reply({ embeds: [new EmbedBuilder()
         .setTitle("Rules in this channel")
@@ -135,4 +153,19 @@ const rulesInChannel = async (interaction: ButtonInteraction) => {
     ], ephemeral: true });
 };
 
-export { command, callback, rulesInChannel };
+const hideMessage = async (interaction: ButtonInteraction) => {
+    const customIdParameters = interaction.customId.split("?");
+    const expected = `@${interaction.user.id}`;
+    if (customIdParameters[1] !== expected) {
+        await interaction.reply({
+            content: `This message is not for you - Only <${expected}> can hide this message.`,
+            ephemeral: true
+        });
+        return;
+    }
+    await interaction.deferUpdate();
+    await interaction.message.delete();
+
+};
+
+export { command, callback, rulesInChannel, reportContent, hideMessage };
