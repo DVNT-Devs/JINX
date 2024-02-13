@@ -21,6 +21,7 @@ export default (discordClient: Client ) => {
     const userContextFiles = readdirSync(userContextFolder).filter(file => file.endsWith(".js"));
 
     void (async () => {
+        // Standard commands
         for (const file of commandFiles) {
             const filePath = path.join(commandsFolder, file);
             const command = await import(filePath);
@@ -32,6 +33,8 @@ export default (discordClient: Client ) => {
             client.commands["message." + command.command.name] = command.callback;
             console.log(`Registered command ${command.command.name}`);
         }
+
+        // Events (interactions, messages, joins, etc.)
         for (const file of eventFiles) {
             const filePath = path.join(eventsFolder, file);
             const event = await import(filePath);
@@ -46,6 +49,8 @@ export default (discordClient: Client ) => {
             }
             console.log(`Registered event ${event.event}`);
         }
+
+        // Context menus - Messages (Report content, FAQ, etc.)
         for (const file of messageContextFiles) {
             const filePath = path.join(messageContextFolder, file);
             const context = await import(filePath);
@@ -58,6 +63,8 @@ export default (discordClient: Client ) => {
             commands.push(context.command);
             console.log(`Registered message context ${context.command.name}`);
         }
+
+        // Context menus - Users (Report user, etc.)
         for (const file of userContextFiles) {
             const filePath = path.join(userContextFolder, file);
             const context = await import(filePath);
