@@ -1,6 +1,8 @@
 import { uuid } from "drizzle-orm/pg-core";
 import { pgTable, varchar, boolean, timestamp, primaryKey } from "drizzle-orm/pg-core";
 
+
+// Discipline command
 export const relationships = pgTable("relationships", {
     dom: varchar("dom_id").notNull(),
     sub: varchar("sub_id").notNull(),
@@ -24,4 +26,12 @@ export const challenges = pgTable("challenges", {
     setBy: varchar("set_by").notNull(),
     challenge: varchar("challenge").notNull(),
     created: timestamp("created").notNull()
+});
+
+// Secrets backup
+export const secrets = pgTable("secrets", {
+    uuid: uuid("uuid").notNull().defaultRandom().primaryKey(),
+    channel: varchar("channel_id").notNull(),
+    message: varchar("message_id").notNull(),
+    member: varchar("member_id").notNull()
 });
