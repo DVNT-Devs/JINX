@@ -4,43 +4,16 @@ import { Colours, rules } from "../data";
 import { logSecret } from "../actions/secrets";
 
 
-const praise = new SlashCommandBuilder()
+const secret = new SlashCommandBuilder()
     .setName("secret")
     .setDescription("Tell a secret to the server")
     .addStringOption(option => option.setName("secret").setDescription("The secret to tell").setRequired(true).setMaxLength(1000));
 
 
 const callback = async (interaction: CommandInteraction | ButtonInteraction) => {
-    let secret;
-    let i;
-    if (interaction.isButton()) {
-        await interaction.showModal(new ModalBuilder()
-            .setCustomId("text")
-            .setTitle("Share a Secret")
-            .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
-                .setCustomId("secret")
-                .setLabel("Share a secret")
-                .setMaxLength(2000)
-                .setStyle(TextInputStyle.Short)
-                .setRequired(false)
-                .setPlaceholder("Pressing submit will NOT send a message")
-            ))
-        );
-        i = undefined as undefined | ModalSubmitInteraction;
-        try {
-            i = await interaction.awaitModalSubmit({
-                filter: (i) => i.user.id === interaction.user.id && i instanceof ModalSubmitInteraction,
-                time: 60000 * 5
-            }) as typeof i;
-        } catch (e) {
-            return;
-        }
-        if (!i) return;
-        secret = i.components[0]?.components[0]?.value;
-    } else {
-        secret = interaction.options.get("secret")!.value as string;
-        i = interaction;
-    }
+    const { i, secret } = await interactionReply(interaction) || {i: undefined};
+    if (!i || !secret) return;
+
     const inSecretsChannel = interaction.channelId === rules.channels.secrets;
     const inConfessionsCategory = interaction.channel?.isThread() && interaction.channel.parentId === rules.channels.confessions;
 
@@ -129,35 +102,17 @@ const agreedToSecret = async (
     // Wait for the user to press a button
     let button;
     try {
-        button = await m.awaitMessageComponent({
-            filter: (i) => i.user.id === interaction.user.id && m.id === i.message.id,
-            time: 60000 * 5
-        }) as ButtonInteraction;
-    } catch (e) {
-        return;
-    }
-    if (!i) return;
-    void button.deferUpdate();
-    if (button.customId !== "agree") return;
-
-    const channel = interaction.channel as GuildTextBasedChannel;
-    const message = await channel.send(`*Anonymous said*: "${secret}"`);
-    void logSecret(channel.id, message.id, interaction.user.id);
-    await i.deleteReply();
-
-    if (inConfessionsCategory) return;
-
-    // Purge any messages from the bot with components
-    const messages = await interaction.channel!.messages.fetch({ limit: 10 });
-    const bulkDeleteChannel = interaction.channel! as GuildTextBasedChannel;
-    await bulkDeleteChannel.bulkDelete(messages.filter(m => m.author.id === interaction.client.user!.id && m.components.length > 0));
-    // Then send a new message with a button
-    await interaction.channel!.send({ components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId("global:secret").setLabel("Share a Secret").setStyle(ButtonStyle.Danger)
-    )] });
+        button = await m.awaitMessageComponent({ filter: (i) =>
+            i.user.id === interaction.user.id && i.message.id === i.id,
+        time: 60000 }) as ButtonInteraction;
+    } catch (e) { return; }
+    await button.deferUpdate();
+    // If they agreed, return true, otherwise return false
+    // Undefined is used as a null response
+    return button.customId === "agree";
 };
 
 export {
-    praise as command,
+    secret as command,
     callback
 };
