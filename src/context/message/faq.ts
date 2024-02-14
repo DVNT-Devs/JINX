@@ -60,9 +60,10 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
 
         let i: StringSelectMenuInteraction | ButtonInteraction;
         try {
-            i = await m.awaitMessageComponent({ filter: (i) =>
-                i.user.id === interaction.user.id && m.id === i.message.id,
-            time: 60000 }) as typeof i;
+            i = await m.awaitMessageComponent({
+                filter: (i) => i.user.id === interaction.user.id && m.id === i.message.id,
+                time: 60000 * 5
+            }) as typeof i;
         } catch (e) {
             return;
         }

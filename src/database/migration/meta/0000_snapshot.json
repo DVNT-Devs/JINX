@@ -1,0 +1,141 @@
+{
+  "id": "89c72eb0-5908-45a6-aa0b-4666919f351d",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "challenges": {
+      "name": "challenges",
+      "schema": "",
+      "columns": {
+        "challenge_id": {
+          "name": "challenge_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "sub_id": {
+          "name": "sub_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_by": {
+          "name": "set_by",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "challenge": {
+          "name": "challenge",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "punishments": {
+      "name": "punishments",
+      "schema": "",
+      "columns": {
+        "punishment_id": {
+          "name": "punishment_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "sub_id": {
+          "name": "sub_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_by": {
+          "name": "set_by",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "punishment": {
+          "name": "punishment",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "relationships": {
+      "name": "relationships",
+      "schema": "",
+      "columns": {
+        "dom_id": {
+          "name": "dom_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sub_id": {
+          "name": "sub_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accepted": {
+          "name": "accepted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "relationships_dom_id_sub_id_pk": {
+          "name": "relationships_dom_id_sub_id_pk",
+          "columns": [
+            "dom_id",
+            "sub_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
