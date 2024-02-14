@@ -103,9 +103,10 @@ const agreedToSecret = async (
     let button;
     try {
         button = await m.awaitMessageComponent({ filter: (i) =>
-            i.user.id === interaction.user.id && i.message.id === i.id,
+            i.user.id === interaction.user.id && i.message.id === m.id,
         time: 60000 }) as ButtonInteraction;
     } catch (e) { return; }
+    console.log(button);
     await button.deferUpdate();
     // If they agreed, return true, otherwise return false
     // Undefined is used as a null response
