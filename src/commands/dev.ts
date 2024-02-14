@@ -1,7 +1,6 @@
 import { join } from "path";
 import { CommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { readFile } from "fs/promises";
-import { migrateFromJson } from "../actions/secrets";
 
 const dev = new SlashCommandBuilder()
     .setName("dev")
@@ -22,7 +21,6 @@ const callback = async (interaction: CommandInteraction) => {
             `> ${message}\n` +
             `> by ${author!.join(" ")}`,
         ephemeral: true });
-    await migrateFromJson();
 };
 
 export {

@@ -1,3 +1,3 @@
 This folder contains files which should remain across builds
-This is because they contain important data (secrets.json), or to reduce the size of API requests (phishing.json)
+This is because they contain important data (phishing.json), or to reduce the size of API requests (phishing.json)
 This file exists mainly so the folder exists in git
