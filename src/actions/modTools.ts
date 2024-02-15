@@ -69,6 +69,7 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
         await interaction.editReply({ embeds: [new EmbedBuilder()
             .setTitle("Mod Tools")
             .setDescription(
+                `**Member:** <@${interaction.targetUser.id}>\n\n` +
                 ("**User note:**" + (userData.note ? `\n${formatNote(userData.note)}` : " *None set*")) +
                 `\n\n**Flags:** ${flagArray.filter(flag => flag).length}`
             )
