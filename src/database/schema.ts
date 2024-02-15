@@ -1,3 +1,4 @@
+import { bigint } from "drizzle-orm/pg-core";
 import { uuid } from "drizzle-orm/pg-core";
 import { pgTable, varchar, boolean, timestamp, primaryKey } from "drizzle-orm/pg-core";
 
@@ -34,4 +35,11 @@ export const secrets = pgTable("secrets", {
     channel: varchar("channel_id").notNull(),
     message: varchar("message_id").notNull(),
     member: varchar("member_id").notNull()
+});
+
+// Member flags
+export const flags = pgTable("flags", {
+    member: varchar("member_id").notNull().unique().primaryKey(),
+    note: varchar("note").notNull().default(""),
+    flags: bigint("flags", {mode: "number"}).notNull().default(0)
 });
