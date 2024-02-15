@@ -1,5 +1,5 @@
 {
-  "id": "4129f1c9-028c-427e-85ab-8d891460f3bd",
+  "id": "7b0606a2-a375-40a8-a5a4-f08094bf88a1",
   "prevId": "89c72eb0-5908-45a6-aa0b-4666919f351d",
   "version": "5",
   "dialect": "pg",
@@ -44,6 +44,44 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
+    },
+    "flags": {
+      "name": "flags",
+      "schema": "",
+      "columns": {
+        "member_id": {
+          "name": "member_id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "flags": {
+          "name": "flags",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "flags_member_id_unique": {
+          "name": "flags_member_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "member_id"
+          ]
+        }
+      }
     },
     "punishments": {
       "name": "punishments",
