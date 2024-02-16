@@ -10,14 +10,25 @@ const secret = new SlashCommandBuilder()
     .addStringOption(option => option.setName("secret").setDescription("The secret to tell").setRequired(true).setMaxLength(1000));
 
 
+const standardRules = "✅ Keep it fun and sexy\n" +
+        "❌ No references to self-harm, violence, or non-consensual activities\n" +
+        "👍 Follow server guidelines";
+
+const channels: Record<string, {embedTitle: string, postType: string, rules?: string, moveButton?: boolean}> = {
+    [rules.channels.secrets]: {embedTitle: "Secret", postType: "secret", rules: standardRules, moveButton: true},
+    [rules.channels.confessions]: {embedTitle: "Confession", postType: "confession", rules: standardRules},
+    [rules.channels.talkItOut]: {embedTitle: "Talk it Out", postType: "thoughts"}
+};
+
+
 const callback = async (interaction: CommandInteraction | ButtonInteraction) => {
     const { i, secret } = await interactionReply(interaction) || {i: undefined};
     if (!i || !secret) return;
 
-    const inSecretsChannel = interaction.channelId === rules.channels.secrets;
-    const inConfessionsCategory = interaction.channel?.isThread() && interaction.channel.parentId === rules.channels.confessions;
+    let channelId = interaction.channelId;
+    if (interaction.channel?.isThread()) channelId = interaction.channel.parentId!;
 
-    if (!inSecretsChannel && !inConfessionsCategory) {
+    if (!Object.keys(channels).includes(channelId)) {
         return await i.reply({embeds: [
             new EmbedBuilder()
                 .setTitle("Wrong Channel")
@@ -26,9 +37,9 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
         ], ephemeral: true});
     }
 
-    const prompt = inSecretsChannel ? "Secret" : "Confession";
+    const channelData = channels[channelId]!;
 
-    const agreed = await agreedToSecret(i, prompt, secret);
+    const agreed = await agreedToSecret(i, channelData.embedTitle, channelData?.postType, secret, channelData?.rules);
     if (agreed === undefined) return;
     if (!agreed) return await i.deleteReply();
 
@@ -37,7 +48,7 @@ const callback = async (interaction: CommandInteraction | ButtonInteraction) => 
     void logSecret(channel.id, message.id, interaction.user.id);
     await i.deleteReply();
 
-    if (inConfessionsCategory) return;
+    if (!channelData.moveButton) return;
 
     // Purge any messages from the bot with components
     const messages = await interaction.channel!.messages.fetch({ limit: 10 });
@@ -79,18 +90,17 @@ const interactionReply = async (interaction: CommandInteraction | ButtonInteract
 
 const agreedToSecret = async (
     interaction: CommandInteraction | ModalSubmitInteraction,
-    prompt: string,
-    secret: string
+    title: string,
+    postType: string,
+    secret: string,
+    rules?: string
 ): Promise<boolean | undefined> => {
     const messageData = { embeds: [new EmbedBuilder()
-        .setTitle(prompt)
+        .setTitle(title)
         .setDescription(
-            `**Preview:**\n> ${secret}\n\n` +
-            "**Rules:**\n" +
-            "✅ Keep it fun and sexy\n" +
-            "❌ No references to self-harm, violence, or non-consensual activities\n" +
-            "👍 Follow server guidelines\n" +
-            `\n**Warning:**\nYou will not be able to edit or delete this ${prompt.toLowerCase()} once it is sent. (Only moderators can delete it.)` +
+            `**Preview:**\n> ${secret}` +
+            (rules ? "\n\n**Rules:**\n" + rules : "" )+
+            `\n\n**Warning:**\nYou will not be able to edit or delete this ${postType} once it is sent. (Only moderators can delete it.)` +
             "\n\nIf you understand this and still want to send it, click the button below."
         )
         .setColor(Colours.Warning)
@@ -106,7 +116,6 @@ const agreedToSecret = async (
             i.user.id === interaction.user.id && i.message.id === m.id,
         time: 60000 }) as ButtonInteraction;
     } catch (e) { return; }
-    console.log(button);
     await button.deferUpdate();
     // If they agreed, return true, otherwise return false
     // Undefined is used as a null response
@@ -117,3 +126,4 @@ export {
     secret as command,
     callback
 };
+
