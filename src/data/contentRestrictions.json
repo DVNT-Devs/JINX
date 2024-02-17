@@ -29,7 +29,7 @@
             "rules": [
                 "😶‍🌫️ All NSFW content must be spoiled",
                 "⛓️ Must have a distinguishable kink",
-                "❗ Include disclaimer (i.e. 'Blood')",
+                "❗ Include a disclaimer - What is in the image?",
                 "💬 Reply to content in <#${channels.kinkyComments}>"
             ]
         },

@@ -1,9 +1,10 @@
-import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, ModalSubmitInteraction, StringSelectMenuInteraction, TextInputStyle, UserContextMenuCommandInteraction, parseEmoji } from "discord.js";
+import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, ModalSubmitInteraction, TextInputStyle, UserContextMenuCommandInteraction, parseEmoji } from "discord.js";
 import DB from "../database/drizzle";
 import { flags } from "../database/schema";
 import { eq } from "drizzle-orm";
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
 import { Colours } from "../data";
+import dualCollector from "../utils/dualCollector";
 
 const flagBits: {name: string, description: string, emoji: string}[] = [
     {name: "Creepy Behavior", description: "The user is exhibiting creepy behavior", emoji: "👀"},
@@ -27,7 +28,7 @@ const indexArrayToInteger = (arr: number[]) => {
 
 
 const userContextCallback = async (interaction: UserContextMenuCommandInteraction) => {
-    await interaction.deferReply({ ephemeral: true });
+    const m = await interaction.deferReply({ ephemeral: true });
     const db = await DB;
     const breakOut = false;
     const defaultData = {
@@ -76,7 +77,10 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
             .setColor(Colours.Success)
         ], components: [select, buttons] });
 
-        const i = await dualCollector(interaction);
+        const i = await dualCollector(
+            interaction,
+            (i) => i.message.id === m.id
+        );
 
         if (!i) { break; }
         const customId = i.customId;
@@ -87,7 +91,7 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
         } else if (customId === "note") {
             await (i as ButtonInteraction).showModal(new ModalBuilder()
                 .setTitle("Add a note")
-                .setCustomId("noteModal")
+                .setCustomId("modToolsModal")
                 .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
                     .setCustomId("noteValue")
                     .setPlaceholder("Enter a note")
@@ -114,27 +118,6 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
             dbEntry = true;
         }
     } while (!breakOut);
-};
-
-const dualCollector = async (interaction: UserContextMenuCommandInteraction):Promise<
-    ModalSubmitInteraction | ButtonInteraction | StringSelectMenuInteraction | null
-> => {
-    return await new Promise((resolve) => {
-        const messageCollector = interaction.channel!.createMessageComponentCollector({
-            filter: (i) => i.user.id === interaction.user.id,
-            time: 60000 * 5
-        }).on("collect", async (i) => {
-            if (i.isButton() || i.isStringSelectMenu()) { resolve(i); }
-        });
-        void interaction.awaitModalSubmit({
-            filter: (i) => i.user.id === interaction.user.id,
-            time: 60000 * 5
-        }).then((i) => {
-            messageCollector.stop();
-            resolve(i);
-            return i;
-        });
-    }).catch(() => null) as ReturnType<typeof dualCollector>;
 };
 
 export { userContextCallback, flagBits };

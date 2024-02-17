@@ -28,48 +28,29 @@ client.once(Events.ClientReady, discordClient => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+    const execute = async (name: string) => {
+        if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand() && !interaction.isUserContextMenuCommand()) return;
+        const command = client.commands[name];
+        if (!command) return;
+        // Try running the command
+        try {
+            await command(interaction);
+        } catch (error) {
+            // If it failed
+            console.error(error);
+            if (!interaction.deferred && !interaction.replied) {
+                await interaction.deferReply({ ephemeral: true });
+            }
+            void interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+        }
+    };
+
     if (interaction.isChatInputCommand()) {
-        const command = client.commands["message." + interaction.commandName];
-        if (!command) return;
-        try {
-            await command(interaction);
-        } catch (error) {
-            console.error(error);
-            if (interaction.deferred || interaction.replied) {
-                await interaction.editReply({ content: "There was an error while executing this command" });
-            } else {
-                await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
-            }
-        }
-        return;
+        return execute("message." + interaction.commandName);
     } else if (interaction.isMessageContextMenuCommand()) {
-        const command = client.commands["messageContext." + interaction.commandName];
-        if (!command) return;
-        try {
-            await command(interaction);
-        } catch (error) {
-            console.error(error);
-            if (interaction.deferred || interaction.replied) {
-                await interaction.editReply({ content: "There was an error while executing this command" });
-            } else {
-                await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
-            }
-        }
-        return;
+        return execute("messageContext." + interaction.commandName);
     } else if (interaction.isUserContextMenuCommand()) {
-        const command = client.commands["userContext." + interaction.commandName];
-        if (!command) return;
-        try {
-            await command(interaction);
-        } catch (error) {
-            console.error(error);
-            if (interaction.deferred || interaction.replied) {
-                await interaction.editReply({ content: "There was an error while executing this command" });
-            } else {
-                await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
-            }
-        }
-        return;
+        return execute("userContext." + interaction.commandName);
     }
     // If it wasn't caught here, pass it into the hook
     client.onInteractionHook(interaction);
