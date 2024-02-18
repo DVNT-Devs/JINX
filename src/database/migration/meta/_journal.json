@@ -15,6 +15,13 @@
       "when": 1707996494485,
       "tag": "0001_nappy_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1708273606021,
+      "tag": "0002_vengeful_umar",
+      "breakpoints": true
     }
   ]
 }

@@ -43,3 +43,13 @@ export const flags = pgTable("flags", {
     note: varchar("note").notNull().default(""),
     flags: bigint("flags", {mode: "number"}).notNull().default(0)
 });
+
+// Timeouts
+export const timeouts = pgTable("timeouts", {
+    member: varchar("member_id").notNull(),
+    channel: varchar("channel_id").notNull(),
+    frequency: bigint("frequency", {mode: "number"}).notNull().default(0),
+    communicationDisabledUntil: timestamp("communication_disabled_until").notNull().default(new Date(0)),
+}, (table) => ({
+    id: primaryKey({ columns: [table.member, table.channel]})
+}));

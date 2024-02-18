@@ -1,10 +1,11 @@
-import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, ModalSubmitInteraction, TextInputStyle, UserContextMenuCommandInteraction, parseEmoji } from "discord.js";
+import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, ChannelType, ModalSubmitInteraction, TextInputStyle, UserContextMenuCommandInteraction, parseEmoji } from "discord.js";
 import DB from "../database/drizzle";
-import { flags } from "../database/schema";
-import { eq } from "drizzle-orm";
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
+import { flags, timeouts } from "../database/schema";
+import { and, eq } from "drizzle-orm";
+import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
 import { Colours } from "../data";
-import dualCollector from "../utils/dualCollector";
+import dualCollector, { BuilderType } from "../utils/dualCollector";
+import client from "../client";
 
 const flagBits: {name: string, description: string, emoji: string}[] = [
     {name: "Creepy Behavior", description: "The user is exhibiting creepy behavior", emoji: "👀"},
@@ -27,8 +28,22 @@ const indexArrayToInteger = (arr: number[]) => {
 };
 
 
+const frequencies: { name: string, description: string, interval: number }[] = [
+    { name: "No limit",       description: "Remove restrictions", interval: 0 },
+    { name: "Every hour",     description: "24 posts per day",    interval: 60 * 60 },
+    { name: "Every 3 hours",  description: "8 posts per day",     interval: 60 * 60 * 3 },
+    { name: "Every 6 hours",  description: "4 posts per day",     interval: 60 * 60 * 6 },
+    { name: "Every 12 hours", description: "2 posts per day",     interval: 60 * 60 * 12 },
+    { name: "Every day",      description: "1 post per day",      interval: 60 * 60 * 24 },
+    { name: "Every 2 days",   description: "3-4 posts per week",  interval: 60 * 60 * 24 * 2 },
+    { name: "Every week",     description: "4 posts per month",   interval: 60 * 60 * 24 * 7 },
+    { name: "Every 2 weeks",  description: "2 posts per month",   interval: 60 * 60 * 24 * 14 },
+    { name: "Every month",    description: "1 post per month",    interval: 60 * 60 * 24 * 30 }
+];
+
+
 const userContextCallback = async (interaction: UserContextMenuCommandInteraction) => {
-    const m = await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
     const db = await DB;
     const breakOut = false;
     const defaultData = {
@@ -38,15 +53,23 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
     };
 
     // Fetch the user's data from the database
-    const data = await db.select().from(flags).where(eq(flags.member, interaction.targetUser.id));
+    const dbData = await db.select().from(flags).where(eq(flags.member, interaction.targetUser.id));
+    const timeoutResults = await db.select().from(timeouts).where(eq(timeouts.member, interaction.targetUser.id));
+    let timeoutResultsMap: Record<string, number> = {};
+    for (const timeout of timeoutResults) {
+        timeoutResultsMap[timeout.channel] = timeout.frequency;
+    }
+    let targetChannel = interaction.channel!.id;
+    let showTimeouts = false;
+
     let userData;
-    let dbEntry: boolean = data.length > 0;
+    let dbEntry: boolean = dbData.length > 0;
     do {
-        userData = userData || data[0] || defaultData;
+        userData = userData || dbData[0] || defaultData;
         const flagArray = integerToBooleanArray(userData.flags);
         let updateDB = false;
 
-        const select = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
+        const flagSelect = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
             .setCustomId("flagSelect")
             .setPlaceholder("Select a flag")
             .setMaxValues(flagBits.length)
@@ -59,32 +82,84 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
                 .setDefault(flagArray[index])
             ))
         );
-        const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder()
-            .setCustomId("note")
-            .setLabel(userData.note ? "Edit Note" : "Add Note")
-            .setStyle(ButtonStyle.Primary)
+        const TextTypes = [ChannelType.GuildText, ChannelType.GuildAnnouncement,
+            ChannelType.PublicThread, ChannelType.PrivateThread];
+        const isThread = interaction.guild?.channels.cache.get(targetChannel)?.isThread();
+        const timeoutSelect = [
+            new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(new ChannelSelectMenuBuilder()
+                .setCustomId("channelSelect")
+                .setMaxValues(1)
+                .setMinValues(1)
+                .setDefaultChannels(isThread ? [] : [targetChannel])  // FIXME: Discord is giving 500's here when thread
+                .setPlaceholder("Select a channel")
+                .setChannelTypes(TextTypes)
+            ),
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
+                .setCustomId("timeoutSelect")
+                .setPlaceholder("Select a timeout")
+                .setMaxValues(1)
+                .setMinValues(1)
+                .addOptions(frequencies.map((freq) => new StringSelectMenuOptionBuilder()
+                    .setLabel(freq.name)
+                    .setDescription(freq.description)
+                    .setValue(freq.interval.toString())
+                    .setDefault((timeoutResultsMap[targetChannel] || 0) === freq.interval)
+                ))
+            )
+        ];
+
+        const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setCustomId("note")
+                .setLabel(userData.note ? "Edit Note" : "Add Note")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("showTimeouts")
+                .setLabel(showTimeouts ? "Show Flags" : "Show Timeouts")
+                .setStyle(ButtonStyle.Secondary)
         );
+        if (showTimeouts) {
+            buttons.addComponents(new ButtonBuilder()
+                .setCustomId("removeAllTimeouts")
+                .setLabel("Remove all timeouts")
+                .setStyle(ButtonStyle.Danger)
+                .setDisabled(Object.keys(timeoutResultsMap).length === 0)
+            );
+        }
+
+        const components: ActionRowBuilder<BuilderType>[] = [];
+        if (showTimeouts) {
+            components.push(...timeoutSelect);
+        } else {
+            components.push(flagSelect);
+        }
+        components.push(buttons);
 
         const formatNote = (note: string) => note.split("\n").map((line) => `> ${line}`).join("\n");
 
-        await interaction.editReply({ embeds: [new EmbedBuilder()
+        const embed = new EmbedBuilder()
             .setTitle("Mod Tools")
             .setDescription(
                 `**Member:** <@${interaction.targetUser.id}>\n\n` +
-                ("**User note:**" + (userData.note ? `\n${formatNote(userData.note)}` : " *None set*")) +
-                `\n\n**Flags:** ${flagArray.filter(flag => flag).length}`
+                `**User note:** ${(userData.note ? `\n${formatNote(userData.note)}` : " *None set*")}\n\n` +
+                `**Flags:** ${flagArray.filter(flag => flag).length}\n` +
+                `**Timeouts:** ${Object.keys(timeoutResultsMap).length}` +
+                (
+                    Object.keys(timeoutResultsMap).length > 0
+                        ? `\n> ${Object.keys(timeoutResultsMap).map((t) => `<#${t}>`).join(", ")}`
+                        : "") +
+                (showTimeouts ? `\n\nCurrently editing: <#${targetChannel}>` : "")
             )
-            .setColor(Colours.Success)
-        ], components: [select, buttons] });
+            .setColor(Colours.Success);
+        await interaction.editReply({ embeds: [embed], components: components});
 
         const i = await dualCollector(
-            interaction,
-            (i) => i.message.id === m.id
+            interaction
         );
 
         if (!i) { break; }
         const customId = i.customId;
-        if (i.isStringSelectMenu()) {
+        if (i.isStringSelectMenu() && customId === "flagSelect") {
             await i.deferUpdate();
             userData.flags = indexArrayToInteger(i.values.map((v) => parseInt(v)));
             updateDB = true;
@@ -109,6 +184,20 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
             note = note?.trim() || "";
             userData.note = note;
             updateDB = true;
+        } else if (i.isStringSelectMenu() && customId === "timeoutSelect") {
+            await i.deferUpdate();
+            const timeoutDuration = parseInt(i.values[0]!);
+            timeoutResultsMap = await setTimeoutInChannel(timeoutDuration, targetChannel, interaction.targetUser.id, timeoutResultsMap);
+        } else if (customId === "showTimeouts") {
+            await i.deferUpdate();
+            showTimeouts = !showTimeouts;
+        } else if (i.isChannelSelectMenu() && customId === "channelSelect") {
+            await i.deferUpdate();
+            targetChannel = i.values[0]!;
+        } else if (customId === "removeAllTimeouts") {
+            await i.deferUpdate();
+            await removeTimeouts(interaction.targetUser.id);
+            timeoutResultsMap = {};
         }
         if (!updateDB) { continue; }
         if (dbEntry) {
@@ -118,6 +207,54 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
             dbEntry = true;
         }
     } while (!breakOut);
+};
+
+const setTimeoutInChannel = async (
+    interval: number,
+    channel: string,
+    member: string,
+    results: Record<string, number>
+) => {
+    const db = await DB;
+    // If the interval is 0, remove the timeout
+    if (interval === 0) {
+        await db.delete(timeouts).where(and(
+            eq(timeouts.member, member),
+            eq(timeouts.channel, channel)
+        ));
+        if (results[channel]) { delete results[channel]; }
+        return results;
+    }
+    // Check if the user/channel combo already exists
+    const timeoutResults = await db.select().from(timeouts).where(and(
+        eq(timeouts.member, member),
+        eq(timeouts.channel, channel)
+    ));
+    if (timeoutResults.length > 0) {
+        // If it does, update the timeout
+        await db.update(timeouts).set({
+            frequency: interval
+        }).where(and(
+            eq(timeouts.member, member),
+            eq(timeouts.channel, channel)
+        ));
+    } else {
+        // If it doesn't, insert a new timeout
+        await db.insert(timeouts).values({
+            member: member,
+            channel: channel,
+            frequency: interval
+        });
+    }
+    results[channel] = interval;
+    client.timeoutsUpToDate = false;
+    return results;
+};
+
+const removeTimeouts = async (member: string) => {
+    const db = await DB;
+    await db.delete(timeouts).where(eq(timeouts.member, member));
+    client.timeoutsUpToDate = false;
 };
 
 export { userContextCallback, flagBits };

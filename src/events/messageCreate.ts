@@ -3,12 +3,17 @@ import data, { Colours, contentRestrictions } from "../data";
 import client from "../client";
 import { EmbedBuilder } from "@discordjs/builders";
 import { reportContent } from "../context/message/reportContent";
+import DB from "../database/drizzle";
+import { timeouts } from "../database/schema";
+import { and, eq } from "drizzle-orm";
 const triggers: Record<string, string> = data.triggers;
 
 const event = "messageCreate";
 
 const callback = async (message: Message) => {
     if (message.author.bot) return;
+
+    if (await checkTimeouts(message)) return;
 
     if (await checkDomains(message)) return;
     if (await checkAttachments(message)) return;
@@ -36,6 +41,47 @@ const checkDomains = async (message: Message) => {
         setTimeout(() => void m.delete(), 20 * 1000);
         return true;
     }
+};
+
+const checkTimeouts = async (message: Message) => {
+    if (!client.timeoutsUpToDate) {
+        const db = await DB;
+        client.timeouts = await db.select().from(timeouts);
+        client.timeoutsUpToDate = true;
+    }
+
+    const timeoutResults = client.timeouts.filter(t => t.member === message.author.id && t.channel === message.channel.id);
+
+    if (timeoutResults.length === 0) return false;
+    const timeout = timeoutResults[0];
+    if (!timeout) return false;
+
+    if (timeout.communicationDisabledUntil > new Date()) {
+        // Cannot speak until a time in the future
+        await message.delete();
+        const discordTimestamp = Math.floor(timeout.communicationDisabledUntil.getTime() / 1000);
+
+        const secondsToRead = 15;
+        const timeInFewSeconds = Math.floor((new Date().getTime() + secondsToRead * 1000) / 1000);
+        const m = await message.channel.send({
+            content: `You are currently timed out in this channel, <@${message.author.id}>.\n` +
+            `You will be able to send messages again <t:${discordTimestamp}:R> (<t:${discordTimestamp}:f>)\n` +
+            `This message will self-destruct <t:${timeInFewSeconds}:R>`
+        });
+        setTimeout(() => void m.delete(), secondsToRead * 1000);
+        return true;
+    }
+
+    const db = await DB;
+    await db.update(timeouts).set({
+        communicationDisabledUntil: new Date(new Date().getTime() + timeout.frequency * 1000)
+    }).where(and(
+        eq(timeouts.member, message.author.id),
+        eq(timeouts.channel, message.channel.id)
+    ));
+    client.timeoutsUpToDate = false;
+
+    return false;
 };
 
 const checkAttachments = async (message: Message) => {
