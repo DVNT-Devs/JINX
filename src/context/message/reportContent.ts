@@ -1,6 +1,7 @@
-import { ButtonInteraction, ButtonStyle, ChannelSelectMenuInteraction, ChannelType, ContextMenuCommandBuilder, Message, MessageContextMenuCommandInteraction, PermissionFlagsBits, StringSelectMenuInteraction } from "discord.js";
+import { ButtonInteraction, ButtonStyle, ChannelType, ContextMenuCommandBuilder, Message, MessageContextMenuCommandInteraction, PermissionFlagsBits, TextInputStyle } from "discord.js";
 import { contentRestrictions, Colours } from "../../data";
-import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "@discordjs/builders";
+import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
+import dualCollector from "../../utils/dualCollector";
 
 const command = new ContextMenuCommandBuilder()
     .setName("Report Content")
@@ -32,7 +33,15 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
     let chosenRule: number | undefined;
     let suggestedChannel: string | undefined;
 
+    let message = "";
+    let refreshMessage: boolean | null = true;
+
     while (!breakOut) {
+        if (refreshMessage) {
+            message = generateMessage(interaction.targetMessage.author.id, chosenRule, suggestedChannel, ruleList, false);
+            refreshMessage = null;
+        }
+
         const ruleSelectMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
             .setCustomId("ruleSelectMenu")
             .setPlaceholder("Select a rule this message breaks")
@@ -57,43 +66,67 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
                 .setCustomId("sendButton")
                 .setLabel("Send")
                 .setStyle(ButtonStyle.Success)
-                .setDisabled((chosenRule === undefined) && !(suggestedChannel))
+                .setDisabled((chosenRule === undefined) && !(suggestedChannel)),
+            new ButtonBuilder()
+                .setCustomId("modifyText")
+                .setLabel("Modify message")
+                .setStyle(ButtonStyle.Secondary)
         );
 
-        await interaction.editReply({ embeds: [new EmbedBuilder()
+        const embed = new EmbedBuilder()
             .setTitle("Report Content")
             .setDescription(
                 `You have selected [this message](${interaction.targetMessage.url}) by <@${interaction.targetMessage.author.id}>.\n` +
                 "You can select a rule this message breaks, and optionally suggest a channel to move it to.\n" +
-                `Current rule selected: ${chosenRule !== undefined ? ruleList[chosenRule] : "*None*"}\n` +
-                `Current suggested channel: ${suggestedChannel ? `<#${suggestedChannel}>` : "*None*"}`
+                `**Current rule selected:** ${chosenRule !== undefined ? ruleList[chosenRule] : "*None*"}\n` +
+                `**Current suggested channel:** ${suggestedChannel ? `<#${suggestedChannel}>` : "*None*"}\n\n` +
+                `**Message Preview:**\n>>> ${message}`
             )
-            .setColor(Colours.Warning)
-        ], components: [ruleSelectMenu, channelSelectMenu, buttons]});
+            .setColor(Colours.Warning);
+        if (refreshMessage === false) embed.setFooter({text: ">>> Changing the channel or rule will reset your custom message. <<<"});
+        await interaction.editReply({ embeds: [embed], components: [ruleSelectMenu, channelSelectMenu, buttons]});
 
-        let i: StringSelectMenuInteraction | ChannelSelectMenuInteraction | ButtonInteraction;
-        try {
-            i = await m.awaitMessageComponent({
-                filter: (i) => i.user.id === interaction.user.id && m.id === i.message.id,
-                time: 60000 * 5
-            }) as typeof i;
-        } catch (e) {
-            return;
+        const i = await dualCollector(
+            interaction,
+            (i) => i.message.id === m.id,
+        );
+
+        if (!i) {
+            break;
         }
-        await i.deferUpdate();
-        if (i.isButton()) {
-            if (i.customId === "sendButton") {
-                readyToSend = true;
-            }
+        if (i.isButton() && i.customId === "sendButton") {
+            await i.deferUpdate();
+            readyToSend = true;
             breakOut = true;
+        } else if (i.isButton() && i.customId === "modifyText") {
+            await showTextModal(message, i);
+        } else if (i.isModalSubmit()) {
+            await i.deferUpdate();
+            message = i.fields.getField("newMessage")?.value;
+            refreshMessage = false;
         } else if (i.isStringSelectMenu()) {
+            await i.deferUpdate();
             chosenRule = parseInt(i.values[0]!);
+            refreshMessage = true;
         } else if (i.isChannelSelectMenu()) {
+            await i.deferUpdate();
             suggestedChannel = i.values[0]!;
+            refreshMessage = true;
+        } else {
+            await i.deferUpdate();
+            break;
         }
+
     }
     if (readyToSend) {
-        await reportContent(interaction.targetMessage, chosenRule, suggestedChannel);
+        await reportContent(
+            interaction.targetMessage,
+            chosenRule,
+            suggestedChannel,
+            ruleList,
+            false,
+            message
+        );
         await interaction.deleteReply();
     } else {
         await interaction.editReply({embeds: [new EmbedBuilder()
@@ -101,7 +134,43 @@ const callback = async (interaction: MessageContextMenuCommandInteraction) => {
             .setDescription("No action was taken - Operation cancelled")
             .setColor(Colours.Warning)
         ], components: []});
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await interaction.deleteReply();
     }
+};
+
+const showTextModal = async (oldText: string, interaction: ButtonInteraction) => {
+    await interaction.showModal(new ModalBuilder()
+        .setCustomId("textModal")
+        .setTitle("Modify Message")
+        .addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(new TextInputBuilder()
+            .setCustomId("newMessage")
+            .setLabel("Modify the message")
+            .setMaxLength(4000)
+            .setStyle(TextInputStyle.Paragraph)
+            .setValue(oldText)
+        ))
+    );
+};
+
+
+const generateMessage = (
+    memberId: string,
+    chosenRule: number | undefined,
+    suggestedChannel: string | undefined,
+    ruleList: string[],
+    automated: boolean
+) => {
+    const preamble = `Hey there <@${memberId}>!\n` +
+        "Your post was removed for not following this channel's guidelines.";
+    const ruleBroken = chosenRule !== undefined ? (
+        `Your post was flagged for breaking Rule ${chosenRule + 1}: ${ruleList[chosenRule]}.`
+    ) : "";
+    const suggestedChannelText = suggestedChannel ? `This content would fit in better in <#${suggestedChannel}>.` : "";
+    const automatedText = automated ? "*This action was done automatically - Please contact a moderator if this was a mistake.*" : "";
+    const text = [preamble, ruleBroken, suggestedChannelText, automatedText].filter((x) => x !== "").join("\n");
+
+    return text;
 };
 
 const reportContent = async (
@@ -109,16 +178,10 @@ const reportContent = async (
     chosenRule: number | undefined,
     suggestedChannel: string | undefined,
     ruleList: string[] = generateRuleList(message.channel!.id),
-    automated: boolean = false
+    automated: boolean = false,
+    text?: string
 ) => {
-    const preamble = `Hey there <@${message.author.id}>!\n` +
-        "Your post was removed for not following this channel's guidelines.";
-    const ruleBroken = chosenRule !== undefined ? (
-        `Your post was flagged for breaking Rule ${chosenRule + 1}: ${ruleList[chosenRule]}.`
-    ) : "";
-    const suggestedChannelText = suggestedChannel ? `This content would fit in better in <#${suggestedChannel}>.` : "";
-    const automatedText = automated ? "*This action was done automatically - Please contact a moderator if this was a mistake.*" : "";
-    const embedText = [preamble, ruleBroken, suggestedChannelText, automatedText].filter((x) => x !== "").join("\n");
+    const embedText = text || generateMessage(message.author.id, chosenRule, suggestedChannel, ruleList, automated);
     const components: ActionRowBuilder<ButtonBuilder>[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId("global:rules")
@@ -155,6 +218,7 @@ const rulesInChannel = async (interaction: ButtonInteraction) => {
 };
 
 const hideMessage = async (interaction: ButtonInteraction) => {
+    // The customID is something like "global:hide!@1234567890"
     const customIdParameters = interaction.customId.split("?");
     const expected = `@${interaction.user.id}`;
     if (customIdParameters[1] !== expected) {
