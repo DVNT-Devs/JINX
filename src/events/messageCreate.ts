@@ -64,8 +64,9 @@ const checkTimeouts = async (message: Message) => {
         const secondsToRead = 15;
         const timeInFewSeconds = Math.floor((new Date().getTime() + secondsToRead * 1000) / 1000);
         const m = await message.channel.send({
-            content: `You are currently timed out in this channel, <@${message.author.id}>.\n` +
-            `You will be able to send messages again <t:${discordTimestamp}:R> (<t:${discordTimestamp}:f>)\n` +
+            content: `You have reached your post limit in this channel for now, <@${message.author.id}>.\n` +
+            `Try again <t:${discordTimestamp}:R> (<t:${discordTimestamp}:f>)\n` +
+            "Feel free to post in other channels in the meantime!" +
             `This message will self-destruct <t:${timeInFewSeconds}:R>`
         });
         setTimeout(() => void m.delete(), secondsToRead * 1000);
