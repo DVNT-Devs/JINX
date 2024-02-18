@@ -79,7 +79,7 @@
             "name": "Spoilers",
             "description": "Explains how to spoiler an image on desktop and mobile",
             "text": [
-                "[GIF in Rules channel[(<https://canary.discord.com/channels/1147406597287579648/1147438564938883134/1203080929975734272>)",
+                "[GIF in Rules channel](<https://canary.discord.com/channels/1147406597287579648/1147438564938883134/1203080929975734272>)",
                 "On desktop, choose your image, then click the eye icon on the image above the chat bar.",
                 "On mobile, choose your image, tap it, then tap 'Mark as Spoiler'."
             ]

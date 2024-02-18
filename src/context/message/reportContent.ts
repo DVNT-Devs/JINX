@@ -218,6 +218,7 @@ const rulesInChannel = async (interaction: ButtonInteraction) => {
 };
 
 const hideMessage = async (interaction: ButtonInteraction) => {
+    // The customID is something like "global:hide!@1234567890"
     const customIdParameters = interaction.customId.split("?");
     const expected = `@${interaction.user.id}`;
     if (customIdParameters[1] !== expected) {

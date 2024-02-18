@@ -46,11 +46,11 @@ client.on(Events.InteractionCreate, async interaction => {
     };
 
     if (interaction.isChatInputCommand()) {
-        return execute("message." + interaction.commandName);
+        return await execute("message." + interaction.commandName);
     } else if (interaction.isMessageContextMenuCommand()) {
-        return execute("messageContext." + interaction.commandName);
+        return await execute("messageContext." + interaction.commandName);
     } else if (interaction.isUserContextMenuCommand()) {
-        return execute("userContext." + interaction.commandName);
+        return await execute("userContext." + interaction.commandName);
     }
     // If it wasn't caught here, pass it into the hook
     client.onInteractionHook(interaction);
