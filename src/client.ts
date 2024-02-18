@@ -6,6 +6,9 @@ class JinxClient extends Client {
     phishing: string[] = [];
     purgeLock: boolean = false;
 
+    timeoutsUpToDate = false;
+    timeouts: {member: string, channel: string, frequency: number, communicationDisabledUntil: Date}[] = [];
+
     constructor() {
         super({ intents: [
             GatewayIntentBits.Guilds,

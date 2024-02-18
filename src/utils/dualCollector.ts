@@ -1,9 +1,12 @@
-import { ButtonInteraction, ChannelSelectMenuInteraction, CommandInteraction, MentionableSelectMenuInteraction, ModalSubmitInteraction, RoleSelectMenuInteraction, StringSelectMenuInteraction, UserSelectMenuInteraction } from "discord.js";
+import { ButtonBuilder, ChannelSelectMenuBuilder, RoleSelectMenuBuilder, UserSelectMenuBuilder } from "@discordjs/builders";
+import { ButtonInteraction, ChannelSelectMenuInteraction, CommandInteraction, MentionableSelectMenuBuilder, MentionableSelectMenuInteraction, ModalSubmitInteraction, RoleSelectMenuInteraction, StringSelectMenuBuilder, StringSelectMenuInteraction, UserSelectMenuInteraction } from "discord.js";
 
 type InteractionType = ButtonInteraction | StringSelectMenuInteraction | ChannelSelectMenuInteraction |
     MentionableSelectMenuInteraction | UserSelectMenuInteraction | RoleSelectMenuInteraction;
+type BuilderType = ButtonBuilder | StringSelectMenuBuilder | ChannelSelectMenuBuilder |
+    MentionableSelectMenuBuilder | UserSelectMenuBuilder | RoleSelectMenuBuilder;
 
-export { InteractionType };
+export { InteractionType, BuilderType };
 
 const dualCollector = async (
     interaction: CommandInteraction | ButtonInteraction,
@@ -27,7 +30,7 @@ const dualCollector = async (
             resolve(i);
             return i;
         }).catch(() => null);
-    }).catch(() => null) as ReturnType<typeof dualCollector>;
+    }).catch((e) => console.log(e)) as ReturnType<typeof dualCollector>;
 };
 
 export default dualCollector;
