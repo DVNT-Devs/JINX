@@ -3,7 +3,7 @@ import client from "./client";
 import dotenv from "dotenv";
 import registerEvents from "./actions/registerEvents";
 import { updatePhishing } from "./phishing";
-// import kickUnverified from "./actions/kickUnverified";
+import kickUnverified from "./actions/kickUnverified";
 
 dotenv.config();
 
@@ -16,15 +16,10 @@ client.once(Events.ClientReady, discordClient => {
 
     // Every hour, check for unverified members and kick them
     // We also run it once on startup
-
-    // Due to event timing, we will be disabling this for now
-
-    /*
     void kickUnverified(client);
     setInterval(() => {
         void kickUnverified(client);
     }, 1000 * 60 * 60);
-    */
 });
 
 client.on(Events.InteractionCreate, async interaction => {
