@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "@discordjs/builders";
 import { ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel } from "discord.js";
-import { Colours, rules } from "../data";
+import { Colours, rules } from "../utils/data";
 import emojis from "../data/emojis.json";
 import { promises as fs } from "fs";
 import { join } from "path";

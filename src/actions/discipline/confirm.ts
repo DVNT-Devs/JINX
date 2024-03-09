@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from "@discordjs/builders";
 import { ButtonStyle, CommandInteraction } from "discord.js";
-import { Colours } from "../../data";
+import { Colours } from "../../utils/data";
 
 export default async function (interaction: CommandInteraction, title: string, text: string): Promise<boolean | null> {
     await interaction.editReply({ embeds: [new EmbedBuilder()

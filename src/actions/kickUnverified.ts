@@ -50,7 +50,6 @@ export default async (client: JinxClient) => {
         if (unverifiedMembers[i] === undefined) return;
         const currentMember = unverifiedMembers[i] as [string, GuildMember];
         const [id, fetchedMember] = currentMember;
-        console.log(`\x1b[31mKicking ${fetchedMember.user.tag}...\x1b0`);
         // If fetchedMember is undefined, use the id
         if (!fetchedMember) {
             const fetchedMember = await guild.members.fetch(id);
@@ -66,8 +65,8 @@ export default async (client: JinxClient) => {
         );
     };
 
-    console.log(`\x1b[31m${new Date().toLocaleTimeString()} - Kicking ${unverifiedMembers.length} unverified members...`);
-    console.log(`ETA: ${Math.round((unverifiedMembers.length * secondsPerKick) / 60)} minutes\x1b0`);
+    console.log(`${new Date().toLocaleTimeString()} - Kicking ${unverifiedMembers.length} unverified members...`);
+    console.log(`ETA: ${Math.round((unverifiedMembers.length * secondsPerKick) / 60)} minutes`);
     await setInterval(() => {
         if (i < unverifiedMembers.length) {
             void execute(i);

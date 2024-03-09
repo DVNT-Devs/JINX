@@ -1,5 +1,5 @@
 import { ButtonInteraction, ButtonStyle, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, PermissionFlagsBits, StringSelectMenuInteraction, User } from "discord.js";
-import { contentRestrictions, Colours } from "../../data";
+import { contentRestrictions, Colours } from "../../utils/data";
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "@discordjs/builders";
 
 const command = new ContextMenuCommandBuilder()

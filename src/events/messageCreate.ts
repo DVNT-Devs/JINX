@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import data, { Colours, contentRestrictions } from "../data";
+import data, { Colours, contentRestrictions } from "../utils/data";
 import client from "../client";
 import { EmbedBuilder } from "@discordjs/builders";
 import { reportContent } from "../context/message/reportContent";

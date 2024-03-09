@@ -1,7 +1,7 @@
 // Load data.json
-import data from "./data/data.json";
-import rules from "./data/rules.json";
-import contentRestrictions from "./data/contentRestrictions.json";
+import data from "../data/data.json";
+import rules from "../data/rules.json";
+import contentRestrictions from "../data/contentRestrictions.json";
 
 export const Colours = {
     Danger: 0xF27878,

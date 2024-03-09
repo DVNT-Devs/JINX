@@ -2,18 +2,27 @@ import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from "@discordjs
 import { ButtonStyle, CommandInteraction, PermissionFlagsBits } from "discord.js";
 
 
-const praise = new SlashCommandBuilder()
+type buttonColours = "Primary" | "Secondary" | "Success" | "Danger";
+const defaultTexts: Record<string, [string, buttonColours, string]> = {
+    "global:secret": ["Share a secret", "Danger", "Secret (Only if broken)"],
+    "global:onboard": ["Get started", "Primary", "Onboard"],
+    "global:rules": ["Read the rules", "Danger", "Rules"],
+    "global:ticket.create:verify": ["Age Verification", "Primary", "Age Verification Ticket"],
+    "global:ticket.create:report": ["Report", "Danger", "Report Ticket"],
+    "global:ticket.close": ["Close ticket", "Danger", "Close Ticket"],
+    "global:ticket.close:reason": ["Close with reason", "Danger", "Close with Reason"],
+};
+
+
+const buttons = new SlashCommandBuilder()
     .setName("buttons")
     .setDescription("Sends a button for users to press (Mod Only)")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addStringOption(option => option
         .setName("type")
         .setDescription("The type of button to send")
-        .addChoices(
-            { name: "Secret (Only if broken)", value: "global:secret" },
-            { name: "Onboard", value: "global:onboard" },
-            { name: "Rules", value: "global:rules" }
-        ).setRequired(true)
+        .addChoices(...Object.entries(defaultTexts).map(([key, [text]]) => ({ name: text, value: key })))
+        .setRequired(true)
     )
     .addStringOption(option => option
         .setName("colour")
@@ -34,16 +43,8 @@ const praise = new SlashCommandBuilder()
     );
 
 
-type buttonColours = "Primary" | "Secondary" | "Success" | "Danger";
-const defaultTexts: Record<string, [string, buttonColours]> = {
-    "global:secret": ["Share a secret", "Danger"],
-    "global:onboard": ["Get started", "Primary"],
-    "global:rules": ["Read the rules", "Danger"]
-};
-
-
 const callback = async (interaction: CommandInteraction) => {
-    const type = interaction.options.get("type")?.value as "global:secret" | "global:onboard" | "global:rules";
+    const type = interaction.options.get("type")?.value as keyof typeof defaultTexts;
     const text = (interaction.options.get("text")?.value || defaultTexts[type as keyof typeof defaultTexts]![0]) as string;
     const colour = interaction.options.get("colour")?.value as buttonColours | undefined;
     const defaultColour = defaultTexts[type as keyof typeof defaultTexts]![1];
@@ -58,6 +59,6 @@ const callback = async (interaction: CommandInteraction) => {
 
 
 export {
-    praise as command,
+    buttons as command,
     callback
 };

@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals";
 
 // Load the "data.ts" module
-import data, { rules, contentRestrictions } from "../data";
+import data, { rules, contentRestrictions } from "../utils/data";
 
 
 const hasNullKeys = (data: Record<string, unknown>) => {

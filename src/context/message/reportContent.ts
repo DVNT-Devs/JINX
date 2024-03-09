@@ -1,5 +1,5 @@
 import { ButtonInteraction, ButtonStyle, ChannelType, ContextMenuCommandBuilder, Message, MessageContextMenuCommandInteraction, PermissionFlagsBits, TextInputStyle } from "discord.js";
-import { contentRestrictions, Colours } from "../../data";
+import { contentRestrictions, Colours } from "../../utils/data";
 import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
 import dualCollector from "../../utils/dualCollector";
 

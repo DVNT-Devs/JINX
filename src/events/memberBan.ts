@@ -1,5 +1,5 @@
 import { GuildBan } from "discord.js";
-import { Colours, contentRestrictions } from "../data";
+import { Colours, contentRestrictions } from "../utils/data";
 import { EmbedBuilder } from "@discordjs/builders";
 
 const event = "guildBanAdd";

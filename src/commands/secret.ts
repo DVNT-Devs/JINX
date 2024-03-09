@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder } from "@discordjs/builders";
 import { ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel, ModalSubmitInteraction, TextInputStyle } from "discord.js";
-import { Colours, rules } from "../data";
+import { Colours, rules } from "../utils/data";
 import { logSecret } from "../actions/secrets";
 
 
@@ -126,4 +126,3 @@ export {
     secret as command,
     callback
 };
-
