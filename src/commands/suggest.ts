@@ -6,7 +6,7 @@ import { promises as fs } from "fs";
 import { join } from "path";
 
 
-const insult = new SlashCommandBuilder()
+const suggest = new SlashCommandBuilder()
     .setName("suggest")
     .setDescription("Suggest a phrase to be added to the bot")
     .addStringOption(option => option
@@ -173,4 +173,4 @@ const callback = async (interaction: CommandInteraction) => {
     ], ephemeral: true});
 };
 
-export { insult as command, callback };
+export { suggest as command, callback };

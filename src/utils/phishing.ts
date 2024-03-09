@@ -11,7 +11,7 @@ interface PhishingJSON {
 
 const updatePhishing = async (): Promise<string[]> => {
     console.log("Fetching phishing domains");
-    const phishingPath = join(__dirname, "..", "globals", "phishing.json");
+    const phishingPath = join(__dirname, "..", "..", "globals", "phishing.json");
     // Check if the file exists
     if (!existsSync(phishingPath)) {
         writeFileSync(phishingPath, JSON.stringify({

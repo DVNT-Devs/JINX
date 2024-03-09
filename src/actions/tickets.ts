@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder } from "@discordjs/builders";
-import { APIMessageComponentEmoji, BaseGuildTextChannel, ButtonInteraction, ButtonStyle, ChannelType, CommandInteraction, GuildChannel, GuildMember, PrivateThreadChannel, TextInputStyle, ThreadAutoArchiveDuration, parseEmoji } from "discord.js";
+import { APIMessageComponentEmoji, BaseGuildTextChannel, ButtonInteraction, ButtonStyle, ChannelType, CommandInteraction, Guild, GuildChannel, GuildMember, PrivateThreadChannel, TextInputStyle, ThreadAutoArchiveDuration, User, parseEmoji } from "discord.js";
 import { Colours } from "../utils/data";
 import { plural } from "../commands/discipline";
 
@@ -138,7 +138,7 @@ const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChan
             .setStyle(ButtonStyle.Link)
             .setLabel("Open Ticket")
             .setURL(`https://discord.com/channels/${member.guild.id}/${thread.id}`)
-    )]});
+    )], ephemeral: true});
 };
 
 
@@ -233,7 +233,7 @@ const joinThread = async (interaction: ButtonInteraction) => {
     const thread = channels.first() as PrivateThreadChannel;
     await thread.members.add(member.id);
 
-    await interaction.editReply({
+    await interaction.reply({
         embeds: [new EmbedBuilder()
             .setTitle("Joined Ticket")
             .setDescription(`You have joined the ticket in <#${thread.id}>`)
@@ -244,7 +244,8 @@ const joinThread = async (interaction: ButtonInteraction) => {
                 .setStyle(ButtonStyle.Link)
                 .setLabel("Open Ticket")
                 .setURL(`https://discord.com/channels/${member.guild.id}/${thread.id}`)
-        )]
+        )],
+        ephemeral: true
     });
 };
 
@@ -260,4 +261,14 @@ const handleThreadClose = async (interaction: CommandInteraction, reason?: strin
     await closeTicket(interaction, reason);
 };
 
-export { createTicket, closeTicket, closeWithReason, joinThread, handleThreadClose };
+const deleteAllThreads = async (guild: Guild, user: User) => {
+    const threads = guild.channels.cache
+        .filter(c => c.isThread())
+        .filter(c => c.type === ChannelType.PrivateThread)
+        .filter(c => c.name.includes(user.id));
+    for (const thread of threads.values()) {
+        await closeTicket({channel: thread as PrivateThreadChannel} as ButtonInteraction);
+    }
+};
+
+export { createTicket, closeTicket, closeWithReason, joinThread, handleThreadClose, deleteAllThreads };
