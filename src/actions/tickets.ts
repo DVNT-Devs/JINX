@@ -121,7 +121,8 @@ const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChan
             .setTitle("Internal Details")
             .setDescription(
                 "*This embed is just here for use by Jinx. Please don't unpin it\n" +
-                `**Thread Info:** [Mod Only](${createdMessage.url})*\n`
+                `${createdMessage.channelId}/${createdMessage.id}\n` +
+                `${member.id}`
             )
 
     ], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -168,13 +169,12 @@ const closeTicket = async (interaction: ButtonInteraction | CommandInteraction, 
     if (threadTarget) await channel.members.remove(threadTarget);
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    const embed = {embeds: [new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setTitle("Ticket Closed")
         .setDescription(`This ticket has been closed by <@${interaction.user.id}> at <t:${currentTimestamp}:R> (<t:${currentTimestamp}:f>)`)
-        .setColor(Colours.Danger)
-    ]};
-    if (interaction.isButton()) { await interaction.message?.edit(embed);
-    } else  { await interaction.reply(embed);
+        .setColor(Colours.Danger);
+    if (interaction.isButton()) { await interaction.message?.edit({embeds: [embed, interaction.message.embeds[1]!]});
+    } else  { await interaction.reply({embeds: [embed]});
     }
 
     await channel.setLocked(true).then(() => channel.setArchived(true));
@@ -198,6 +198,19 @@ const closeTicket = async (interaction: ButtonInteraction | CommandInteraction, 
         .setLabel("View Ticket")
         .setURL(`https://discord.com/channels/${interaction.guild!.id}/${channel.id}`)
     )]});
+
+    // Fetch the oldest channel pin
+    const pins = await channel.messages.fetchPinned();
+    const data = pins.first()?.embeds[1]?.description || null;
+    if (!data) return;
+    const [_preamble, threadInfo, _userInfo, ..._rest] = data.split("\n");
+    const [channelId, messageId] = threadInfo!.split("/");
+    if (!channelId || !messageId) return;
+    const targetChannel = await interaction.guild!.channels.resolve(channelId) as BaseGuildTextChannel;
+    if (!channel) return;
+    const targetMessage = await targetChannel.messages.fetch(messageId);
+    if (!targetMessage) return;
+    await targetMessage.delete();
 };
 
 const closeWithReason = async (interaction: ButtonInteraction) => {
@@ -230,7 +243,6 @@ const closeWithReason = async (interaction: ButtonInteraction) => {
 
 const joinThread = async (interaction: ButtonInteraction) => {
     // global:ticket.join:threadId
-    await interaction.deferUpdate();
     const threadId = interaction.customId.split(":")[2];
     const member = interaction.member as GuildMember;
 
