@@ -13,10 +13,10 @@ const ticketTypes: Record<string, {
     standardTimeout: ThreadAutoArchiveDuration,
     text: string
 }> =  {
-    "1215940855668412456": {
+    "1164256806495850556": {
         type: "Age Verification",
         start: "verify",
-        createNotify: "1215940969875243028",
+        createNotify: "1164694356314304624",
         icon: "🔞",
         limit: 1,
         standardTimeout: ThreadAutoArchiveDuration.OneHour,
@@ -28,17 +28,17 @@ const ticketTypes: Record<string, {
             "Please send the photos in this ticket when you are ready. Support will be with you shortly.\n\n" +
             "You may close your ticket, however this will cancel the verification process."
     },
-    "1215964019526209626": {
+    "1161826563843690497": {
         type: "Report",
         start: "report",
-        createNotify: "1215940933858889789",
+        createNotify: "1216087276291887224",
         icon: "🚨",
         limit: 3,
         standardTimeout: ThreadAutoArchiveDuration.OneWeek,
         text: "Thanks for helping us to keep DVNT fun and safe!\nPlease describe your issue, and a moderator will be with you shortly."
     }
 };
-const closeLogs = "1215940997054333032";
+const closeLogs = "1164696678633308300";
 
 
 const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChannel, member?: GuildMember) => {
