@@ -1,7 +1,7 @@
 import { ButtonStyle, CommandInteraction } from "discord.js";
 import { Data as DisciplineData, ModuleReturnData, plural } from "../../commands/discipline";
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, UserSelectMenuBuilder } from "@discordjs/builders";
-import { Colours } from "../../data";
+import { Colours } from "../../utils/data";
 import DB from "../../database/drizzle";
 import { relationships } from "../../database/schema";
 import { and, eq } from "drizzle-orm";

@@ -1,5 +1,5 @@
 import { ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, PermissionFlagsBits } from "discord.js";
-import data from "../../data";
+import data from "../../utils/data";
 import DB from "../../database/drizzle";
 import { secrets } from "../../database/schema";
 import { and, eq } from "drizzle-orm";

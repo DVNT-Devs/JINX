@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from "@discordjs/builders";
 import { ButtonStyle, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { Colours } from "../data";
+import { Colours } from "../utils/data";
 import DB from "../database/drizzle";
 import { challenges, punishments, relationships } from "../database/schema";
 import { eq, inArray, or } from "drizzle-orm";
@@ -15,7 +15,8 @@ export { plural };
 const discipline = new SlashCommandBuilder()
     .setName("discipline")
     // .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-    .setDescription("Give discipline to a member");
+    .setDescription("Give discipline to a member")
+    .setNSFW(true);
 
 
 export interface Data {
@@ -109,13 +110,13 @@ const callback = async (interaction: CommandInteraction) => {
                     .setLabel("Punishments")
                     .setStyle(ButtonStyle.Secondary)
                     .setEmoji({id: "1169338343851557045"})
-                    .setDisabled(data.domsAccepted.length === 0 && data.subsAccepted.length === 0),
+                    .setDisabled(data.domsAccepted.length === 0 && data.subsAccepted.length === 0 || true),
                 new ButtonBuilder()
                     .setCustomId("challenge")
                     .setLabel("Challenges")
                     .setStyle(ButtonStyle.Secondary)
                     .setEmoji({id: "1168736435147395252"})
-                    .setDisabled(data.domsAccepted.length === 0 && data.subsAccepted.length === 0),
+                    .setDisabled(data.domsAccepted.length === 0 && data.subsAccepted.length === 0 || true),
                 new ButtonBuilder()
                     .setCustomId("killSwitch")
                     .setLabel("Opt-out")

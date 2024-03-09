@@ -1,6 +1,6 @@
 import { ButtonBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "@discordjs/builders";
 import { APIMessageComponentEmoji, ActionRowBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, GuildMember, GuildMemberRoleManager, StringSelectMenuInteraction, parseEmoji } from "discord.js";
-import data from "../data";
+import data from "../utils/data";
 
 interface RoleOption {
     name: string;

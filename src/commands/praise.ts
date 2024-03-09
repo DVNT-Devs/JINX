@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, GuildMember } from "discord.js";
-import data from "../data";
+import data from "../utils/data";
 
 import { responseFrom } from "../actions/randomResponses";
 import { backfireResponse } from "../actions/backfire";
@@ -9,6 +9,7 @@ import { backfireResponse } from "../actions/backfire";
 const praise = new SlashCommandBuilder()
     .setName("praise")
     .setDescription("Praise a fellow member, or yourself")
+    .setNSFW(true)
     .addUserOption(option => option.setName("user").setDescription("The user to praise | Default: Yourself").setRequired(false));
 
 

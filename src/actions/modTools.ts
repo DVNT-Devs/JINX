@@ -3,7 +3,7 @@ import DB from "../database/drizzle";
 import { flags, timeouts } from "../database/schema";
 import { and, eq } from "drizzle-orm";
 import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
-import { Colours } from "../data";
+import { Colours } from "../utils/data";
 import dualCollector, { BuilderType } from "../utils/dualCollector";
 import client from "../client";
 

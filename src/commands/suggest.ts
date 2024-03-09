@@ -1,12 +1,12 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "@discordjs/builders";
 import { ButtonInteraction, ButtonStyle, CommandInteraction, GuildTextBasedChannel } from "discord.js";
-import { Colours, rules } from "../data";
+import { Colours, rules } from "../utils/data";
 import emojis from "../data/emojis.json";
 import { promises as fs } from "fs";
 import { join } from "path";
 
 
-const insult = new SlashCommandBuilder()
+const suggest = new SlashCommandBuilder()
     .setName("suggest")
     .setDescription("Suggest a phrase to be added to the bot")
     .addStringOption(option => option
@@ -173,4 +173,4 @@ const callback = async (interaction: CommandInteraction) => {
     ], ephemeral: true});
 };
 
-export { insult as command, callback };
+export { suggest as command, callback };

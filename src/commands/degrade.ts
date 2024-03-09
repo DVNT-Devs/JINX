@@ -1,14 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, GuildMember } from "discord.js";
-import data from "../data";
+import data from "../utils/data";
 
 import { responseFrom } from "../actions/randomResponses";
 import { backfireResponse } from "../actions/backfire";
 
 
-const insult = new SlashCommandBuilder()
+const degrade = new SlashCommandBuilder()
     .setName("degrade")
     .setDescription("Degrade a fellow member, or yourself")
+    .setNSFW(true)
     .addUserOption(option => option.setName("user").setDescription("The user to insult | Default: Yourself").setRequired(false))
     .addStringOption(option => option
         .setName("type")
@@ -53,6 +54,6 @@ const callback = async (interaction: CommandInteraction) => {
 
 
 export {
-    insult as command,
+    degrade as command,
     callback
 };

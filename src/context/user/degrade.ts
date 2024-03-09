@@ -1,6 +1,6 @@
 import { ContextMenuCommandBuilder, GuildMember, UserContextMenuCommandInteraction } from "discord.js";
 import { responseFrom } from "../../actions/randomResponses";
-import data from "../../data";
+import data from "../../utils/data";
 import { backfireResponse } from "../../actions/backfire";
 
 const command = new ContextMenuCommandBuilder()

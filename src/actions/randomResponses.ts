@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import data from "../data";
+import data from "../utils/data";
 import { readFileSync } from "fs";
 import { join } from "path";
 
