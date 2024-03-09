@@ -120,7 +120,7 @@ const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChan
         new EmbedBuilder()
             .setTitle("Internal Details")
             .setDescription(
-                "*This embed is just here for use by Jinx. Please don't unpin it\n" +
+                "*This embed is just here for use by Jinx. Please don't unpin it*\n" +
                 `${createdMessage.channelId}/${createdMessage.id}\n` +
                 `${member.id}`
             )
