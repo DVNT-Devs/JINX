@@ -93,7 +93,7 @@ const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChan
     const notifyChannel = member.guild.channels.resolve(type.createNotify) as BaseGuildTextChannel;
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    await notifyChannel.send({embeds: [new EmbedBuilder()
+    const createdMessage = await notifyChannel.send({embeds: [new EmbedBuilder()
         .setTitle(`${type.icon} Ticket Created`)
         .setDescription(
             `**Opened by:** <@${member.id}>\n` +
@@ -112,10 +112,18 @@ const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChan
             .setCustomId(`global:ticket.join:${thread.id}`)
     )]});
 
-    await thread.send({embeds: [new EmbedBuilder()
-        .setTitle(type.type)
-        .setDescription(type.text)
-        .setColor(Colours.Success)
+    const intro = await thread.send({embeds: [
+        new EmbedBuilder()
+            .setTitle(type.type)
+            .setDescription(type.text)
+            .setColor(Colours.Success),
+        new EmbedBuilder()
+            .setTitle("Internal Details")
+            .setDescription(
+                "*This embed is just here for use by Jinx. Please don't unpin it\n" +
+                `**Thread Info:** [Mod Only](${createdMessage.url})*\n`
+            )
+
     ], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setStyle(ButtonStyle.Danger)
@@ -128,6 +136,7 @@ const createTicket = async (interaction?: ButtonInteraction, channel?: GuildChan
             .setLabel("Close Ticket with Reason")
             .setCustomId("global:ticket.close:reason")
     )]});
+    await intro.pin();
 
     if (interaction) await interaction.reply({embeds: [new EmbedBuilder()
         .setTitle("Ticket Created")
