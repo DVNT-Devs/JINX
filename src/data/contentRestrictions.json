@@ -62,7 +62,7 @@
             "name": "Verification Info",
             "description": "Explains the process of verification",
             "text": [
-                "Hello, <@*{userId}>! Here's some info on the verification process...\n",
+                "Hello, {userMention}! Here's some info on the verification process...\n",
                 "1. Please allow 24 hours for our mods to verify your ticket (although usually it takes much less).",
                 "2. Remember! You need 2 photos to be verified (read the instructions in your ticket carefully).",
                 "3. After verification, your ticket is archived privately.",

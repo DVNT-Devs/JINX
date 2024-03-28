@@ -1,9 +1,9 @@
-import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, ChannelType, ModalSubmitInteraction, TextInputStyle, UserContextMenuCommandInteraction, parseEmoji } from "discord.js";
+import { APIMessageComponentEmoji, ButtonInteraction, ButtonStyle, ChannelType, GuildMemberRoleManager, ModalSubmitInteraction, PermissionFlagsBits, PermissionsBitField, TextInputStyle, UserContextMenuCommandInteraction, parseEmoji } from "discord.js";
 import DB from "../database/drizzle";
 import { flags, timeouts } from "../database/schema";
 import { and, eq } from "drizzle-orm";
 import { ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, EmbedBuilder, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder } from "@discordjs/builders";
-import { Colours } from "../utils/data";
+import data, { Colours } from "../utils/data";
 import dualCollector, { BuilderType } from "../utils/dualCollector";
 import client from "../client";
 
@@ -65,6 +65,7 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
     let userData;
     let dbEntry: boolean = dbData.length > 0;
     do {
+        const isAgeVerified = (interaction.targetMember?.roles as GuildMemberRoleManager) .cache.has(data.roles.ageVerified);
         userData = userData || dbData[0] || defaultData;
         const flagArray = integerToBooleanArray(userData.flags);
         let updateDB = false;
@@ -116,7 +117,15 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
             new ButtonBuilder()
                 .setCustomId("showTimeouts")
                 .setLabel(showTimeouts ? "Show Flags" : "Show Timeouts")
-                .setStyle(ButtonStyle.Secondary)
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId("ageVerify")
+                .setLabel(isAgeVerified ? "Age Verified" : "Verify Age")
+                .setStyle(isAgeVerified ? ButtonStyle.Secondary : ButtonStyle.Success)
+                .setDisabled(
+                    isAgeVerified ||
+                    !(interaction.member?.permissions as PermissionsBitField).has(PermissionFlagsBits.ManageRoles)
+                )
         );
         if (showTimeouts) {
             buttons.addComponents(new ButtonBuilder()
@@ -198,6 +207,9 @@ const userContextCallback = async (interaction: UserContextMenuCommandInteractio
             await i.deferUpdate();
             await removeTimeouts(interaction.targetUser.id);
             timeoutResultsMap = {};
+        } else if (customId === "ageVerify") {
+            await i.deferUpdate();
+            await (interaction.targetMember!.roles as GuildMemberRoleManager).add(data.roles.ageVerified);
         }
         if (!updateDB) { continue; }
         if (dbEntry) {

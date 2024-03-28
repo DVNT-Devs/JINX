@@ -10,7 +10,8 @@ const command = new ContextMenuCommandBuilder()
 
 const replacement = (str: string, user: User) => {
     return str
-        .replaceAll("*{userId}", user.id);
+        .replaceAll("*{userId}", user.id)
+        .replaceAll("{userMention}", `<@${user.id}>`);
 };
 
 const callback = async (interaction: MessageContextMenuCommandInteraction) => {
